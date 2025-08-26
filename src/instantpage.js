@@ -42,10 +42,10 @@ if ('instantIntensity' in document.body.dataset) {
     }
   }
   else {
-    const milliseconds = parseInt(intensity)
-    if (!isNaN(milliseconds)) {
-      delayOnHover = milliseconds
-    }
+   const milliseconds = Number.parseInt(intensity, 10)
+   if (!Number.isNaN(milliseconds)) {
+   delayOnHover = milliseconds
+   }
   }
 }
 
