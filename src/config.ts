@@ -97,7 +97,7 @@ export const umamiConfig: UmamiConfig = {
 	// For self-hosted use your domain, e.g. https://umami.example.com
 	baseUrl: "https://umami.lvcdy.cn",
 	// Your Umami website ID (UUID). Set this to enable tracking.
-	shareId: "1d2fc39b-523b-4fdc-9508-b0c677ce4285",
+	shareId: "385ac4ab-cae2-4d49-ad8b-87db42122a61",
 	// Optional: timezone for share pages or reporting
 	timezone: "Asia/Shanghai",
 };
