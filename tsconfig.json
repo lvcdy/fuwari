@@ -2,7 +2,11 @@
 	"compilerOptions": {
 		"target": "ES2020",
 		"useDefineForClassFields": true,
-		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"lib": [
+			"ES2020",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"module": "ESNext",
 		"skipLibCheck": true,
 		"strict": true,
@@ -17,21 +21,30 @@
 		"jsx": "react-jsx",
 		"baseUrl": ".",
 		"paths": {
-			"src/*": ["./src/*"],
-			"@components/*": ["./src/components/*"],
-			"@assets/*": ["./src/assets/*"],
-			"@constants/*": ["./src/constants/*"],
-			"@utils/*": ["./src/utils/*"],
-			"@i18n/*": ["./src/i18n/*"],
-			"@layouts/*": ["./src/layouts/*"],
-			"@/*": ["./src/*"]
+			"@components/*": [
+				"./src/components/*"
+			],
+			"@assets/*": [
+				"./src/assets/*"
+			],
+			"@constants/*": [
+				"./src/constants/*"
+			],
+			"@utils/*": [
+				"./src/utils/*"
+			],
+			"@i18n/*": [
+				"./src/i18n/*"
+			],
+			"@layouts/*": [
+				"./src/layouts/*"
+			],
+			"@/*": [
+				"./src/*"
+			]
 		},
-		"plugins": [
-			{
-				"name": "@astrojs/ts-plugin"
-			}
-		]
 	},
-	"include": ["src/**/*"],
-	"references": [{ "path": "./tsconfig.node.json" }]
+	"include": [
+		"src/**/*"
+	]
 }
