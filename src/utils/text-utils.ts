@@ -1,5 +1,8 @@
 /**
  * Count words in a markdown string
+ * For Chinese: counts characters (including Chinese punctuation)
+ * For English: counts words (separated by whitespace/punctuation)
+ * For mixed content: sums both
  * @param markdown - Markdown content
  * @returns Number of words
  */
@@ -12,7 +15,15 @@ export function countWords(markdown: string): number {
 		.replace(/\[[^\]]*\]\([^)]*\)/g, " ")
 		.replace(/[\r\n\t]+/g, " ");
 
-	return cleaned.replace(/\s+/g, "").length;
+	// Count Chinese characters (including Chinese punctuation)
+	const chineseChars = cleaned.match(/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g);
+	const chineseCount = chineseChars ? chineseChars.length : 0;
+
+	// Count English words (sequences of Latin letters)
+	const englishWords = cleaned.match(/[a-zA-Z]+/g);
+	const englishCount = englishWords ? englishWords.length : 0;
+
+	return chineseCount + englishCount;
 }
 
 /**
