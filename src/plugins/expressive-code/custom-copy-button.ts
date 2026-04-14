@@ -37,12 +37,12 @@ export function pluginCustomCopyButton() {
 								children: [
 									{
 										type: "raw" as const,
-										value: SVG_ICONS.copy
+										value: SVG_ICONS.copy,
 									},
 									{
 										type: "raw" as const,
-										value: SVG_ICONS.success
-									}
+										value: SVG_ICONS.success,
+									},
 								],
 							},
 						],

@@ -1,11 +1,11 @@
 ---
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import TrafficStats from "@components/misc/TrafficStats.astro";
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "@/config";
 import { getSortedPosts } from "@/utils/content-utils";
-import { url } from "@/utils/url-utils";
 import { countWords, formatCompactNumber } from "@/utils/text-utils";
-import ImageWrapper from "@components/misc/ImageWrapper.astro";
-import TrafficStats from "@components/misc/TrafficStats.astro";
+import { url } from "@/utils/url-utils";
 
 const config = profileConfig;
 const posts = await getSortedPosts();
