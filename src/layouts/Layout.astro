@@ -187,7 +187,7 @@ if (backgroundConfig.type === "src") {
 		)}
 
 		<!-- Text color adaptive script -->
-		<script is:inline define:vars={{enableAutoDetect: textColorConfig.enableAutoDetect, lightModeTextColor: textColorConfig.lightModeTextColor, darkModeTextColor: textColorConfig.darkModeTextColor, threshold: textColorConfig.threshold}}>
+		<script define:vars={{enableAutoDetect: textColorConfig.enableAutoDetect, lightModeTextColor: textColorConfig.lightModeTextColor, darkModeTextColor: textColorConfig.darkModeTextColor, threshold: textColorConfig.threshold}}>
 			import { applyAdaptiveTextColor } from '../utils/text-color';
 			import { initializePerformanceMonitoring, enableImageLazyLoading } from '../utils/performance';
 
