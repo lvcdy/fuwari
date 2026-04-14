@@ -1,0 +1,133 @@
+---
+interface Props {
+	mode: "site" | "path";
+	path?: string;
+	compact?: boolean;
+	layout?: "default" | "profile";
+	class?: string;
+	visitsLabel?: string;
+	pageviewsLabel?: string;
+	title?: string;
+}
+
+const {
+	mode,
+	path = "",
+	compact = false,
+	layout = "default",
+	class: className = "",
+	visitsLabel = "访问量",
+	pageviewsLabel = "阅读量",
+	title = "站点统计",
+} = Astro.props;
+
+const rootId = `traffic-stats-${Math.random().toString(36).slice(2, 10)}`;
+---
+
+<div
+	id={rootId}
+	class={className}
+	data-mode={mode}
+	data-path={path}
+	data-visits-label={visitsLabel}
+	data-pageviews-label={pageviewsLabel}
+>
+	{layout === "profile" ? (
+		<div class="pt-3">
+			<div class="border-t border-dashed border-black/10 dark:border-white/[0.15] mb-3"></div>
+			<div class="grid grid-cols-2 gap-2.5">
+				<div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
+					<div class="text-[0.7rem] text-50 mb-0.5">{visitsLabel}</div>
+					<div class="text-base font-bold text-90" data-visits>--</div>
+				</div>
+				<div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
+					<div class="text-[0.7rem] text-50 mb-0.5">{pageviewsLabel}</div>
+					<div class="text-base font-bold text-90" data-pageviews>--</div>
+				</div>
+			</div>
+		</div>
+	) : compact ? (
+		<div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
+			<div class="flex items-center gap-1">
+				<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--primary)]"></span>
+				<span>
+					{visitsLabel}: <span data-visits>--</span>
+				</span>
+			</div>
+			<div class="flex items-center gap-1">
+				<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--primary)]"></span>
+				<span>
+					{pageviewsLabel}: <span data-pageviews>--</span>
+				</span>
+			</div>
+		</div>
+	) : (
+		<div class="card-base rounded-[var(--radius-large)] px-5 py-4 mb-4 onload-animation">
+			<div class="text-sm text-neutral-500 dark:text-neutral-400 mb-2">{title}</div>
+			<div class="flex flex-wrap gap-4">
+				<div class="text-black/80 dark:text-white/80 font-medium">
+					{visitsLabel}: <span class="text-[var(--primary)]" data-visits>--</span>
+				</div>
+				<div class="text-black/80 dark:text-white/80 font-medium">
+					{pageviewsLabel}: <span class="text-[var(--primary)]" data-pageviews>--</span>
+				</div>
+			</div>
+		</div>
+	)}
+</div>
+
+<script is:inline>
+	(() => {
+		const script = document.currentScript;
+		const root = script?.previousElementSibling;
+
+		if (!(root instanceof HTMLElement)) return;
+
+		const visitsNode = root.querySelector("[data-visits]");
+		const pageviewsNode = root.querySelector("[data-pageviews]");
+		const mode = root.getAttribute("data-mode");
+		const path = root.getAttribute("data-path") || "";
+		const formatter = new Intl.NumberFormat("zh-CN");
+
+		const endpoint =
+			mode === "site"
+				? "/api/stats/site.json"
+				: `/api/stats/post.json?path=${encodeURIComponent(path)}`;
+
+		const setText = (node, value) => {
+			if (node) node.textContent = value;
+		};
+
+		const load = async () => {
+			try {
+				const response = await fetch(endpoint, {
+					method: "GET",
+					headers: {
+						accept: "application/json",
+					},
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch stats");
+				}
+
+				const payload = await response.json();
+				setText(visitsNode, formatter.format(Number(payload.visits) || 0));
+				setText(
+					pageviewsNode,
+					formatter.format(Number(payload.pageviews) || 0),
+				);
+			} catch {
+				root.classList.add("hidden");
+			}
+		};
+
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", load, { once: true });
+		} else {
+			load();
+		}
+
+		document.addEventListener("astro:after-swap", load);
+	})();
+</script>

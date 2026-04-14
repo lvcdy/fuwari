@@ -103,6 +103,8 @@ export const umamiConfig: UmamiConfig = {
 	baseUrl: "https://umami.lvcdy.cn",
 	// Your Umami website ID (UUID). Set this to enable tracking.
 	shareId: "385ac4ab-cae2-4d49-ad8b-87db42122a61",
+	// Public share page slug used to query read-only stats.
+	shareSlug: "E5uPmBmTf8auON6m",
 	// Optional: timezone for share pages or reporting
 	timezone: "Asia/Shanghai",
 };

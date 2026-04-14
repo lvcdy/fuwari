@@ -1,10 +1,41 @@
 ---
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "@/config";
+import { getSortedPosts } from "@/utils/content-utils";
 import { url } from "../../utils/url-utils";
 import ImageWrapper from "../misc/ImageWrapper.astro";
+import TrafficStats from "../misc/TrafficStats.astro";
 
 const config = profileConfig;
+const posts = await getSortedPosts();
+
+const postCount = posts.length;
+
+function countWords(markdown: string) {
+	const cleaned = markdown
+		.replace(/```[\s\S]*?```/g, " ")
+		.replace(/`[^`]*`/g, " ")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+		.replace(/\[[^\]]*\]\([^)]*\)/g, " ")
+		.replace(/[\r\n\t]+/g, " ");
+
+	return cleaned.replace(/\s+/g, "").length;
+}
+
+const totalWords = posts.reduce(
+	(sum, post) => sum + countWords(post.body || ""),
+	0,
+);
+
+function formatCompactNumber(num: number) {
+	if (num >= 10000) {
+		const value = (num / 10000).toFixed(1).replace(/\.0$/, "");
+		return `${value}w`;
+	}
+
+	return String(num);
+}
 ---
 <div class="card-base p-3">
     <a aria-label="Go to About Page" href={url('/about/')}
@@ -33,6 +64,28 @@ const config = profileConfig;
                 <Icon name={config.links[0].icon} class="text-[1.5rem]"></Icon>
                 {config.links[0].name}
             </a>}
+        </div>
+
+        <div class="pt-3 mt-3 border-t border-dashed border-black/10 dark:border-white/[0.15]">
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
+                    <div class="flex items-center justify-center gap-1 text-50 text-[0.7rem] mb-0.5">
+                        <Icon name="material-symbols:article-outline-rounded" class="text-sm"></Icon>
+                        <span>文章数</span>
+                    </div>
+                    <div class="text-base font-bold text-90">{postCount}</div>
+                </div>
+
+                <div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
+                    <div class="flex items-center justify-center gap-1 text-50 text-[0.7rem] mb-0.5">
+                        <Icon name="material-symbols:notes-rounded" class="text-sm"></Icon>
+                        <span>总字数</span>
+                    </div>
+                    <div class="text-base font-bold text-90">{formatCompactNumber(totalWords)}</div>
+                </div>
+            </div>
+
+            <TrafficStats mode="site" layout="profile" visitsLabel="访问量" pageviewsLabel="阅读量" />
         </div>
     </div>
 </div>

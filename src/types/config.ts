@@ -102,6 +102,7 @@ export type UmamiConfig = {
 	enable: boolean;
 	baseUrl: string;
 	shareId: string;
+	shareSlug?: string;
 	timezone: string;
 };
 
