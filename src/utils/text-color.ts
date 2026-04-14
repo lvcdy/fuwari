@@ -2,14 +2,9 @@
  * Detect background brightness and adjust text color accordingly
  */
 
-interface ColorConfig {
-	lightModeTextColor: string; // 浅色模式文字颜色
-	darkModeTextColor: string; // 深色模式文字颜色
-	enableAutoDetect: boolean; // 启用自动检测
-	threshold: number; // 亮度阈值（0-255）
-}
+import type { TextColorConfig } from "@/types/config";
 
-export const defaultColorConfig: ColorConfig = {
+export const defaultColorConfig: TextColorConfig = {
 	lightModeTextColor: "rgb(30, 30, 30)", // 深色文字（用于亮背景）
 	darkModeTextColor: "rgb(245, 245, 245)", // 浅色文字（用于暗背景）
 	enableAutoDetect: true,
@@ -110,7 +105,7 @@ export const shouldUseDarkText = (
  */
 export const applyAdaptiveTextColor = async (
 	imageUrl: string,
-	config: ColorConfig = defaultColorConfig,
+	config: TextColorConfig = defaultColorConfig,
 ): Promise<void> => {
 	if (!config.enableAutoDetect) return;
 

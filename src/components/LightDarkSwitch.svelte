@@ -1,5 +1,5 @@
 <script lang="ts">
-import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants.ts";
+import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
@@ -7,9 +7,9 @@ import {
 	applyThemeToDocument,
 	getStoredTheme,
 	setTheme,
-} from "@utils/setting-utils.ts";
+} from "@utils/setting-utils";
 import { onMount } from "svelte";
-import type { LIGHT_DARK_MODE } from "@/types/config.ts";
+import type { LIGHT_DARK_MODE } from "@/types/config";
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
 let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);

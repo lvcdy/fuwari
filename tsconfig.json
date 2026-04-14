@@ -1,14 +1,21 @@
 {
-	"extends": "astro/tsconfigs/strict",
 	"compilerOptions": {
+		"target": "ES2020",
+		"useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"strict": true,
 		"strictNullChecks": true,
 		"allowJs": false,
 		"declaration": true,
-		"plugins": [
-			{
-				"name": "@astrojs/ts-plugin"
-			}
-		],
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"baseUrl": ".",
 		"paths": {
 			"src/*": ["./src/*"],
 			"@components/*": ["./src/components/*"],
@@ -18,7 +25,13 @@
 			"@i18n/*": ["./src/i18n/*"],
 			"@layouts/*": ["./src/layouts/*"],
 			"@/*": ["./src/*"]
-		}
+		},
+		"plugins": [
+			{
+				"name": "@astrojs/ts-plugin"
+			}
+		]
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*"],
+	"references": [{ "path": "./tsconfig.node.json" }]
 }

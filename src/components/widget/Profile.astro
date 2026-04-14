@@ -2,40 +2,20 @@
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "@/config";
 import { getSortedPosts } from "@/utils/content-utils";
-import { url } from "../../utils/url-utils";
-import ImageWrapper from "../misc/ImageWrapper.astro";
-import TrafficStats from "../misc/TrafficStats.astro";
+import { url } from "@/utils/url-utils";
+import { countWords, formatCompactNumber } from "@/utils/text-utils";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import TrafficStats from "@components/misc/TrafficStats.astro";
 
 const config = profileConfig;
 const posts = await getSortedPosts();
 
 const postCount = posts.length;
 
-function countWords(markdown: string) {
-	const cleaned = markdown
-		.replace(/```[\s\S]*?```/g, " ")
-		.replace(/`[^`]*`/g, " ")
-		.replace(/<[^>]+>/g, " ")
-		.replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-		.replace(/\[[^\]]*\]\([^)]*\)/g, " ")
-		.replace(/[\r\n\t]+/g, " ");
-
-	return cleaned.replace(/\s+/g, "").length;
-}
-
 const totalWords = posts.reduce(
 	(sum, post) => sum + countWords(post.body || ""),
 	0,
 );
-
-function formatCompactNumber(num: number) {
-	if (num >= 10000) {
-		const value = (num / 10000).toFixed(1).replace(/\.0$/, "");
-		return `${value}w`;
-	}
-
-	return String(num);
-}
 ---
 <div class="card-base p-3">
     <a aria-label="Go to About Page" href={url('/about/')}

@@ -110,3 +110,10 @@ export type BackgroundConfig = {
 	type: "remote" | "public" | "src";
 	src: string;
 };
+
+export type TextColorConfig = {
+	enableAutoDetect: boolean;
+	lightModeTextColor: string;
+	darkModeTextColor: string;
+	threshold: number;
+};

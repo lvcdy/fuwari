@@ -1,7 +1,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getCategoryUrl, normalizePostSlug } from "@utils/url-utils.ts";
+import { getCategoryUrl, normalizePostSlug } from "@utils/url-utils";
 
 /**
  * Generic function to create a count map from items

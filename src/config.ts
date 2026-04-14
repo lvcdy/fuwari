@@ -5,6 +5,7 @@ import type {
 	NavBarConfig,
 	ProfileConfig,
 	SiteConfig,
+	TextColorConfig,
 	UmamiConfig,
 } from "./types/config";
 import { LinkPreset } from "./types/config";
@@ -110,7 +111,7 @@ export const umamiConfig: UmamiConfig = {
 };
 
 // Text color adaptive configuration
-export const textColorConfig = {
+export const textColorConfig: TextColorConfig = {
 	// Enable automatic text color adjustment based on background brightness
 	enableAutoDetect: true,
 	// Light mode text color (used for bright backgrounds)
