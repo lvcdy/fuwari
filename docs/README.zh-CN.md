@@ -58,23 +58,8 @@ deno run -A npm:create-fuwari@latest
 
 ### Umami 配置
 
-如果你要在生产环境启用 Umami 统计，请在部署平台中配置以下环境变量：
-
-| 变量名 | 用途 |
-|:--|:--|
-| `UMAMI_BASE_URL` | Umami API 基地址。Umami Cloud 请使用 `https://api.umami.is/v1`，自托管则填写 `https://umami.example.com` |
-| `UMAMI_WEBSITE_ID` | Umami 网站 ID，用于埋点和统计查询 |
-| `UMAMI_SHARE_URL` | 可选的公开统计链接，会显示在导航栏中 |
-| `UMAMI_API_KEY` | Umami Cloud 必填的 API key |
-| `UMAMI_AUTH_TOKEN` | 可选的 bearer token，适用于自托管 Umami |
-| `UMAMI_USERNAME` / `UMAMI_PASSWORD` | 可选的自托管登录兜底方式 |
-
-请只使用与你的 Umami 部署类型匹配的一种认证方式：
-
-- Umami Cloud：`UMAMI_BASE_URL=https://api.umami.is/v1` + `UMAMI_API_KEY`
-- 自托管：`UMAMI_BASE_URL=https://umami.example.com` + `UMAMI_AUTH_TOKEN` 或 `UMAMI_USERNAME` / `UMAMI_PASSWORD`
-
-你也可以直接参考仓库根目录的 `.env.example`。
+Umami 统计现在直接写在 [`src/config.ts`](../src/config.ts) 里。
+不再需要环境变量或示例模板。
 
 ## ⚙️ 文章 Frontmatter
 

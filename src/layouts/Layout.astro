@@ -182,7 +182,7 @@ if (backgroundConfig.type === "src") {
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
-		{umamiConfig.enable && umamiConfig.baseUrl && umamiConfig.websiteId && (
+		{umamiConfig.baseUrl && umamiConfig.websiteId && umamiConfig.authToken && (
 			<script is:inline defer src={`${umamiConfig.baseUrl.replace(/\/+$/, '')}/script.js`} data-website-id={umamiConfig.websiteId}></script>
 		)}
 

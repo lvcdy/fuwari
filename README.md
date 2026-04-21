@@ -51,23 +51,8 @@ A static blog template built with [Astro](https://astro.build).
 
 ### Umami configuration
 
-If you want Umami tracking and stats in production, configure these environment variables on your deployment platform:
-
-| Variable | Purpose |
-|:--|:--|
-| `UMAMI_BASE_URL` | Your Umami API base URL. Use `https://api.umami.is/v1` for Umami Cloud, or your self-hosted instance URL like `https://umami.example.com` |
-| `UMAMI_WEBSITE_ID` | Your Umami website ID used for tracking and stats queries |
-| `UMAMI_SHARE_URL` | Optional public stats link shown in the navbar |
-| `UMAMI_API_KEY` | Required for Umami Cloud |
-| `UMAMI_AUTH_TOKEN` | Optional bearer token for self-hosted Umami |
-| `UMAMI_USERNAME` / `UMAMI_PASSWORD` | Optional self-hosted login fallback |
-
-Use only the auth method that matches your Umami deployment:
-
-- Umami Cloud: `UMAMI_BASE_URL=https://api.umami.is/v1` + `UMAMI_API_KEY`
-- Self-hosted: `UMAMI_BASE_URL=https://umami.example.com` + either `UMAMI_AUTH_TOKEN` or `UMAMI_USERNAME` / `UMAMI_PASSWORD`
-
-Copy `.env.example` as a starting point if you want a local template.
+Umami stats are configured directly in [`src/config.ts`](./src/config.ts).
+No environment variables or example templates are required for stats now.
 
 ## 📝 Frontmatter of Posts
 

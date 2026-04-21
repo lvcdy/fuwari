@@ -10,14 +10,9 @@ export type UmamiStats = {
 
 const DEFAULT_RETRIES = 3;
 const REQUEST_TIMEOUT_MS = 6000;
-let cachedAuthHeadersList: HeadersInit[] | null = null;
 
 function getBaseUrl() {
 	return umamiConfig.baseUrl.replace(/\/+$/, "");
-}
-
-function isUmamiCloudBaseUrl() {
-	return getBaseUrl().startsWith("https://api.umami.is");
 }
 
 function toNumber(value: unknown) {
@@ -82,12 +77,6 @@ async function fetchJsonWithRetry<T>(
 		: new Error("Failed to fetch Umami data");
 }
 
-function ensureUmamiEnabled() {
-	if (!umamiConfig.enable) {
-		throw new Error("Umami is disabled");
-	}
-}
-
 function getWebsiteId() {
 	if (!umamiConfig.websiteId?.trim()) {
 		throw new Error("Missing umamiConfig.websiteId");
@@ -107,114 +96,34 @@ function buildStatsUrl(websiteId: string, normalizedPath?: string) {
 		search.set("path", normalizedPath);
 	}
 
-	const basePath = isUmamiCloudBaseUrl() ? "/websites" : "/api/websites";
-	return `${getBaseUrl()}${basePath}/${websiteId}/stats?${search.toString()}`;
-}
-
-function hasValue(value?: string) {
-	return Boolean(value?.trim());
-}
-
-async function loginToUmami() {
-	const username = umamiConfig.username?.trim();
-	const password = umamiConfig.password?.trim();
-
-	if (!username || !password) {
-		throw new Error("Missing Umami username/password");
-	}
-
-	const payload = await fetchJsonWithRetry<{ token?: string }>(
-		`${getBaseUrl()}/api/auth/login`,
-		{
-			method: "POST",
-			headers: {
-				"content-type": "application/json",
-			},
-			body: JSON.stringify({ username, password }),
-		},
-	);
-
-	if (!payload.token) {
-		throw new Error("Invalid Umami login response");
-	}
-
-	return payload.token;
-}
-
-async function getAuthHeaderCandidates(): Promise<HeadersInit[]> {
-	if (cachedAuthHeadersList?.length) {
-		return cachedAuthHeadersList;
-	}
-
-	const apiKey = umamiConfig.apiKey?.trim() || "";
-	const authToken = umamiConfig.authToken?.trim() || "";
-	const headersList: HeadersInit[] = [];
-
-	if (isUmamiCloudBaseUrl()) {
-		if (!hasValue(apiKey)) {
-			throw new Error(
-				"Umami Cloud requires UMAMI_API_KEY and UMAMI_BASE_URL=https://api.umami.is/v1",
-			);
-		}
-
-		headersList.push({
-			"x-umami-api-key": apiKey,
-		});
-
-		cachedAuthHeadersList = headersList;
-		return headersList;
-	}
-
-	if (hasValue(umamiConfig.username) && hasValue(umamiConfig.password)) {
-		headersList.push({
-			authorization: `Bearer ${await loginToUmami()}`,
-		});
-	}
-
-	if (hasValue(authToken)) {
-		headersList.push({
-			authorization: `Bearer ${authToken}`,
-		});
-	}
-
-	if (!headersList.length) {
-		throw new Error("Missing Umami authentication configuration");
-	}
-
-	cachedAuthHeadersList = headersList;
-	return headersList;
+	return `${getBaseUrl()}/api/websites/${websiteId}/stats?${search.toString()}`;
 }
 
 async function queryStats(normalizedPath?: string): Promise<UmamiStats> {
 	const websiteId = getWebsiteId();
-	const candidates = await getAuthHeaderCandidates();
-	let lastError: unknown;
+	const authToken = umamiConfig.authToken?.trim();
 
-	for (const headers of candidates) {
-		try {
-			const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
-				buildStatsUrl(websiteId, normalizedPath),
-				{
-					method: "GET",
-					headers,
-				},
-			);
-
-			return {
-				pageviews: toNumber(payload.pageviews),
-				visitors: toNumber(payload.visitors),
-				visits: toNumber(payload.visits),
-				bounces: toNumber(payload.bounces),
-				totaltime: toNumber(payload.totaltime),
-			};
-		} catch (error) {
-			lastError = error;
-		}
+	if (!authToken) {
+		throw new Error("Missing Umami auth token");
 	}
 
-	throw lastError instanceof Error
-		? lastError
-		: new Error("Failed to fetch Umami data");
+	const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
+		buildStatsUrl(websiteId, normalizedPath),
+		{
+			method: "GET",
+			headers: {
+				authorization: `Bearer ${authToken}`,
+			},
+		},
+	);
+
+	return {
+		pageviews: toNumber(payload.pageviews),
+		visitors: toNumber(payload.visitors),
+		visits: toNumber(payload.visits),
+		bounces: toNumber(payload.bounces),
+		totaltime: toNumber(payload.totaltime),
+	};
 }
 
 function shouldRetryWithTrailingSlash(path: string, stats: UmamiStats) {
@@ -226,13 +135,10 @@ function toggleTrailingSlash(path: string) {
 }
 
 export async function getSiteStats() {
-	ensureUmamiEnabled();
 	return queryStats();
 }
 
 export async function getPathStats(path: string) {
-	ensureUmamiEnabled();
-
 	const normalized = normalizePath(path);
 	const primary = await queryStats(normalized);
 
