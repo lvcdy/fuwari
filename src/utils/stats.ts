@@ -32,10 +32,6 @@ export function jsonResponse(
 	});
 }
 
-export function formatStatCount(value: number, locale = "zh-CN") {
-	return new Intl.NumberFormat(locale).format(value);
-}
-
 export function coerceStats(
 	stats?: Partial<StatsPayload> | null,
 ): StatsPayload {

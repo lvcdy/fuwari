@@ -1,7 +1,7 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
-import { formatStatCount } from "@/utils/stats";
+import { formatStatCount } from "@/utils/number-utils";
 
 export let className = "";
 export let style = "";

@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type {
 	BackgroundConfig,
 	ExpressiveCodeConfig,
@@ -9,6 +11,49 @@ import type {
 	UmamiConfig,
 } from "./types/config";
 import { LinkPreset } from "./types/config";
+
+const localEnvFile = path.resolve(process.cwd(), ".env");
+let localEnvLoaded = false;
+
+function loadLocalEnvFile() {
+	if (localEnvLoaded || !fs.existsSync(localEnvFile)) {
+		return;
+	}
+
+	const contents = fs.readFileSync(localEnvFile, "utf8");
+	for (const line of contents.split(/\r?\n/)) {
+		const trimmed = line.trim();
+
+		if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) {
+			continue;
+		}
+
+		const separatorIndex = trimmed.indexOf("=");
+		if (separatorIndex <= 0) {
+			continue;
+		}
+
+		const key = trimmed.slice(0, separatorIndex).trim();
+		const rawValue = trimmed.slice(separatorIndex + 1).trim();
+
+		if (!key || process.env[key]) {
+			continue;
+		}
+
+		const unquotedValue =
+			rawValue.startsWith('"') && rawValue.endsWith('"')
+				? rawValue.slice(1, -1)
+				: rawValue.startsWith("'") && rawValue.endsWith("'")
+					? rawValue.slice(1, -1)
+					: rawValue;
+
+		process.env[key] = unquotedValue;
+	}
+
+	localEnvLoaded = true;
+}
+
+loadLocalEnvFile();
 
 function getEnv(name: string) {
 	return process.env[name]?.trim() || "";

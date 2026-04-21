@@ -10,8 +10,7 @@ export type UmamiStats = {
 
 const DEFAULT_RETRIES = 3;
 const REQUEST_TIMEOUT_MS = 6000;
-let cachedAuthHeaders: HeadersInit | null = null;
-let cachedAuthHeadersPromise: Promise<HeadersInit> | null = null;
+let cachedAuthHeadersList: HeadersInit[] | null = null;
 
 function getBaseUrl() {
 	return umamiConfig.baseUrl.replace(/\/+$/, "");
@@ -137,65 +136,71 @@ async function loginToUmami() {
 	return payload.token;
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-	if (cachedAuthHeaders) {
-		return cachedAuthHeaders as HeadersInit;
-	}
-
-	if (cachedAuthHeadersPromise) {
-		return cachedAuthHeadersPromise;
+async function getAuthHeaderCandidates(): Promise<HeadersInit[]> {
+	if (cachedAuthHeadersList?.length) {
+		return cachedAuthHeadersList;
 	}
 
 	const apiKey = umamiConfig.apiKey?.trim() || "";
 	const authToken = umamiConfig.authToken?.trim() || "";
+	const headersList: HeadersInit[] = [];
 
 	if (hasValue(apiKey)) {
-		cachedAuthHeaders = {
+		headersList.push({
 			"x-umami-api-key": apiKey,
-		};
-		return cachedAuthHeaders as HeadersInit;
+		});
+	}
+
+	if (hasValue(umamiConfig.username) && hasValue(umamiConfig.password)) {
+		headersList.push({
+			authorization: `Bearer ${await loginToUmami()}`,
+		});
 	}
 
 	if (hasValue(authToken)) {
-		cachedAuthHeaders = {
+		headersList.push({
 			authorization: `Bearer ${authToken}`,
-		};
-		return cachedAuthHeaders as HeadersInit;
+		});
 	}
 
-	cachedAuthHeadersPromise = loginToUmami().then((token) => {
-		cachedAuthHeaders = {
-			authorization: `Bearer ${token}`,
-		};
-		return cachedAuthHeaders;
-	});
-
-	try {
-		return await cachedAuthHeadersPromise;
-	} finally {
-		cachedAuthHeadersPromise = null;
+	if (!headersList.length) {
+		throw new Error("Missing Umami authentication configuration");
 	}
+
+	cachedAuthHeadersList = headersList;
+	return headersList;
 }
 
 async function queryStats(normalizedPath?: string): Promise<UmamiStats> {
 	const websiteId = getWebsiteId();
-	const headers = await getAuthHeaders();
+	const candidates = await getAuthHeaderCandidates();
+	let lastError: unknown;
 
-	const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
-		buildStatsUrl(websiteId, normalizedPath),
-		{
-			method: "GET",
-			headers,
-		},
-	);
+	for (const headers of candidates) {
+		try {
+			const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
+				buildStatsUrl(websiteId, normalizedPath),
+				{
+					method: "GET",
+					headers,
+				},
+			);
 
-	return {
-		pageviews: toNumber(payload.pageviews),
-		visitors: toNumber(payload.visitors),
-		visits: toNumber(payload.visits),
-		bounces: toNumber(payload.bounces),
-		totaltime: toNumber(payload.totaltime),
-	};
+			return {
+				pageviews: toNumber(payload.pageviews),
+				visitors: toNumber(payload.visitors),
+				visits: toNumber(payload.visits),
+				bounces: toNumber(payload.bounces),
+				totaltime: toNumber(payload.totaltime),
+			};
+		} catch (error) {
+			lastError = error;
+		}
+	}
+
+	throw lastError instanceof Error
+		? lastError
+		: new Error("Failed to fetch Umami data");
 }
 
 function shouldRetryWithTrailingSlash(path: string, stats: UmamiStats) {

@@ -1,10 +1,10 @@
 ---
 import {
 	coerceStats,
-	formatStatCount,
 	safeGetPathStats,
 	safeGetSiteStats,
 } from "@/utils/stats";
+import { formatStatCount } from "@/utils/number-utils";
 
 interface Props {
 	mode: "site" | "path";

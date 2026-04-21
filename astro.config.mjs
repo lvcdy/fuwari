@@ -172,20 +172,19 @@ export default defineConfig({
 				},
 			},
 		},
-		// 性能优化：优化依赖预构建
 		ssr: {
 			external: ["sharp"],
 		},
 		// 路径别名配置
 		resolve: {
 			alias: {
-				'@': path.resolve(__dirname, './src'),
-				'@components': path.resolve(__dirname, './src/components'),
-				'@assets': path.resolve(__dirname, './src/assets'),
-				'@constants': path.resolve(__dirname, './src/constants'),
-				'@utils': path.resolve(__dirname, './src/utils'),
-				'@i18n': path.resolve(__dirname, './src/i18n'),
-				'@layouts': path.resolve(__dirname, './src/layouts'),
+				"@": path.resolve(__dirname, "./src"),
+				"@components": path.resolve(__dirname, "./src/components"),
+				"@assets": path.resolve(__dirname, "./src/assets"),
+				"@constants": path.resolve(__dirname, "./src/constants"),
+				"@utils": path.resolve(__dirname, "./src/utils"),
+				"@i18n": path.resolve(__dirname, "./src/i18n"),
+				"@layouts": path.resolve(__dirname, "./src/layouts"),
 			},
 		},
 	},

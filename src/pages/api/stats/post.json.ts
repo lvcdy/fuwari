@@ -10,9 +10,14 @@ export const GET: APIRoute = async ({ request }) => {
 		const stats = path ? await getPathStats(path) : emptyStats;
 
 		return jsonResponse(stats, 200, noStoreHeaders);
-	} catch {
+	} catch (error) {
+		console.error("[api/stats/post.json]", error);
+
 		return jsonResponse(
-			{ error: "Unable to fetch post stats" },
+			{
+				error: "Unable to fetch post stats",
+				detail: error instanceof Error ? error.message : String(error),
+			},
 			503,
 			noStoreHeaders,
 		);

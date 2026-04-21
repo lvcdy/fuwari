@@ -7,9 +7,14 @@ export const GET: APIRoute = async () => {
 		const stats = await getSiteStats();
 
 		return jsonResponse(stats, 200, noStoreHeaders);
-	} catch {
+	} catch (error) {
+		console.error("[api/stats/site.json]", error);
+
 		return jsonResponse(
-			{ error: "Unable to fetch site stats" },
+			{
+				error: "Unable to fetch site stats",
+				detail: error instanceof Error ? error.message : String(error),
+			},
 			503,
 			noStoreHeaders,
 		);
