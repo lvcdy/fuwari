@@ -56,6 +56,21 @@ deno run -A npm:create-fuwari@latest
 4. 执行 `pnpm new-post <filename>` 创建新文章，并在 `src/content/posts/` 目录中编辑
 5. 参考[官方指南](https://docs.astro.build/zh-cn/guides/deploy/)将博客部署至 Vercel, Netlify, GitHub Pages 等；部署前需编辑 `astro.config.mjs` 中的站点设置。
 
+### Umami 配置
+
+如果你要在生产环境启用 Umami 统计，请在部署平台中配置以下环境变量：
+
+| 变量名 | 用途 |
+|:--|:--|
+| `UMAMI_BASE_URL` | Umami 实例地址，例如 `https://umami.example.com` |
+| `UMAMI_WEBSITE_ID` | Umami 网站 ID，用于埋点和统计查询 |
+| `UMAMI_SHARE_URL` | 可选的公开统计链接，会显示在导航栏中 |
+| `UMAMI_API_KEY` | Umami Cloud 的 API key |
+| `UMAMI_AUTH_TOKEN` | 可选的 bearer token，适用于自托管 Umami |
+| `UMAMI_USERNAME` / `UMAMI_PASSWORD` | 可选的自托管登录兜底方式 |
+
+你也可以直接参考仓库根目录的 `.env.example`。
+
 ## ⚙️ 文章 Frontmatter
 
 ```yaml

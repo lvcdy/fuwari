@@ -1,0 +1,104 @@
+---
+import type { UmamiStats } from "@/utils/umami-stats";
+import { Icon } from "astro-icon/components";
+import path from "node:path";
+import I18nKey from "../../i18n/i18nKey";
+import { i18n } from "../../i18n/translation";
+import { getDir } from "../../utils/url-utils";
+import ImageWrapper from "../misc/ImageWrapper.astro";
+import PostMetadata from "../PostMeta.astro";
+
+interface Props {
+	post: {
+		title: string;
+		words: number;
+		minutes: number;
+		published: Date;
+		updated?: Date;
+		tags: string[];
+		category: string | null;
+		statsPath?: string;
+		stats?: Pick<UmamiStats, "visits" | "pageviews">;
+		image?: string;
+		entryId: string;
+	};
+}
+
+const { post } = Astro.props;
+const {
+	title,
+	words,
+	minutes,
+	published,
+	updated,
+	tags,
+	category,
+	statsPath,
+	stats,
+	image,
+	entryId,
+} = post;
+
+const hasImage = typeof image === "string" && image.trim() !== "";
+const imageBasePath = path.join("content/posts/", getDir(entryId));
+const readingStats = [
+	{
+		icon: "material-symbols:notes-rounded",
+		value: words,
+		label: i18n(I18nKey.wordsCount),
+	},
+	{
+		icon: "material-symbols:schedule-outline-rounded",
+		value: minutes,
+		label: i18n(minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount),
+	},
+] as const;
+---
+
+<header class="onload-animation">
+	<div class="flex flex-row flex-wrap text-black/30 dark:text-white/30 gap-5 mb-3">
+		{readingStats.map((item) => (
+			<div class="flex flex-row items-center">
+				<div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+					<Icon name={item.icon} />
+				</div>
+				<div class="text-sm">
+					{item.value} {" " + item.label}
+				</div>
+			</div>
+		))}
+	</div>
+
+	<div class="relative">
+		<div
+			data-pagefind-body
+			data-pagefind-weight="10"
+			data-pagefind-meta="title"
+			class="transition w-full block font-bold mb-3 text-3xl md:text-[2.25rem]/[2.75rem] text-black/90 dark:text-white/90 md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)] before:absolute before:top-[0.75rem] before:left-[-1.125rem]"
+		>
+			{title}
+		</div>
+	</div>
+
+	<div class="mb-5">
+		<PostMetadata
+			class="mb-5"
+			published={published}
+			updated={updated}
+			tags={tags}
+			category={category}
+			statsPath={statsPath}
+			stats={stats}
+		/>
+		{!hasImage && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
+	</div>
+
+	{hasImage && (
+		<ImageWrapper
+			id="post-cover"
+			src={image}
+			basePath={imageBasePath}
+			class="mb-8 rounded-xl banner-container"
+		/>
+	)}
+</header>

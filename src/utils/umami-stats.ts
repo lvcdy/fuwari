@@ -1,10 +1,5 @@
 import { umamiConfig } from "@/config";
 
-type SharePayload = {
-	websiteId: string;
-	token: string;
-};
-
 export type UmamiStats = {
 	pageviews: number;
 	visitors: number;
@@ -14,21 +9,12 @@ export type UmamiStats = {
 };
 
 const DEFAULT_RETRIES = 3;
+const REQUEST_TIMEOUT_MS = 6000;
+let cachedAuthHeaders: HeadersInit | null = null;
+let cachedAuthHeadersPromise: Promise<HeadersInit> | null = null;
 
 function getBaseUrl() {
 	return umamiConfig.baseUrl.replace(/\/+$/, "");
-}
-
-function getShareSlug() {
-	if (umamiConfig.shareSlug?.trim()) {
-		return umamiConfig.shareSlug.trim();
-	}
-
-	if (umamiConfig.shareId && !/^[0-9a-f-]{36}$/i.test(umamiConfig.shareId)) {
-		return umamiConfig.shareId;
-	}
-
-	return "";
 }
 
 function toNumber(value: unknown) {
@@ -41,16 +27,16 @@ function toNumber(value: unknown) {
 function normalizePath(path: string) {
 	let normalizedPath = path;
 
-	try {
-		if (
-			normalizedPath.startsWith("http://") ||
-			normalizedPath.startsWith("https://")
-		) {
+	if (
+		normalizedPath.startsWith("http://") ||
+		normalizedPath.startsWith("https://")
+	) {
+		try {
 			const url = new URL(normalizedPath);
 			normalizedPath = url.pathname;
+		} catch {
+			// Use the original value if URL parsing fails.
 		}
-	} catch {
-		// Use the original value if URL parsing fails.
 	}
 
 	if (!normalizedPath.startsWith("/")) {
@@ -75,7 +61,7 @@ async function fetchJsonWithRetry<T>(
 					accept: "application/json",
 					...init.headers,
 				},
-				signal: AbortSignal.timeout(6000),
+				signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 			});
 
 			if (!response.ok) {
@@ -93,53 +79,113 @@ async function fetchJsonWithRetry<T>(
 		: new Error("Failed to fetch Umami data");
 }
 
-async function getSharePayload(): Promise<SharePayload> {
-	const shareSlug = getShareSlug();
-
-	if (!shareSlug) {
-		throw new Error("Missing umamiConfig.shareSlug");
+function ensureUmamiEnabled() {
+	if (!umamiConfig.enable) {
+		throw new Error("Umami is disabled");
 	}
-
-	const payload = await fetchJsonWithRetry<Partial<SharePayload>>(
-		`${getBaseUrl()}/api/share/${encodeURIComponent(shareSlug)}`,
-		{
-			method: "GET",
-			headers: {
-				"user-agent": "fuwari-stats-client",
-			},
-		},
-	);
-
-	if (!payload.websiteId || !payload.token) {
-		throw new Error("Invalid share payload from Umami");
-	}
-
-	return {
-		websiteId: payload.websiteId,
-		token: payload.token,
-	};
 }
 
-async function queryStats(path?: string): Promise<UmamiStats> {
-	const { websiteId, token } = await getSharePayload();
+function getWebsiteId() {
+	if (!umamiConfig.websiteId?.trim()) {
+		throw new Error("Missing umamiConfig.websiteId");
+	}
 
+	return umamiConfig.websiteId.trim();
+}
+
+function buildStatsUrl(websiteId: string, normalizedPath?: string) {
 	const search = new URLSearchParams({
 		startAt: "0",
 		endAt: String(Date.now()),
 		timezone: umamiConfig.timezone,
 	});
 
-	if (path) {
-		search.set("path", normalizePath(path));
+	if (normalizedPath) {
+		search.set("path", normalizedPath);
 	}
 
+	return `${getBaseUrl()}/api/websites/${websiteId}/stats?${search.toString()}`;
+}
+
+function hasValue(value?: string) {
+	return Boolean(value?.trim());
+}
+
+async function loginToUmami() {
+	const username = umamiConfig.username?.trim();
+	const password = umamiConfig.password?.trim();
+
+	if (!username || !password) {
+		throw new Error("Missing Umami username/password");
+	}
+
+	const payload = await fetchJsonWithRetry<{ token?: string }>(
+		`${getBaseUrl()}/api/auth/login`,
+		{
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+			},
+			body: JSON.stringify({ username, password }),
+		},
+	);
+
+	if (!payload.token) {
+		throw new Error("Invalid Umami login response");
+	}
+
+	return payload.token;
+}
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+	if (cachedAuthHeaders) {
+		return cachedAuthHeaders as HeadersInit;
+	}
+
+	if (cachedAuthHeadersPromise) {
+		return cachedAuthHeadersPromise;
+	}
+
+	const apiKey = umamiConfig.apiKey?.trim() || "";
+	const authToken = umamiConfig.authToken?.trim() || "";
+
+	if (hasValue(apiKey)) {
+		cachedAuthHeaders = {
+			"x-umami-api-key": apiKey,
+		};
+		return cachedAuthHeaders as HeadersInit;
+	}
+
+	if (hasValue(authToken)) {
+		cachedAuthHeaders = {
+			authorization: `Bearer ${authToken}`,
+		};
+		return cachedAuthHeaders as HeadersInit;
+	}
+
+	cachedAuthHeadersPromise = loginToUmami().then((token) => {
+		cachedAuthHeaders = {
+			authorization: `Bearer ${token}`,
+		};
+		return cachedAuthHeaders;
+	});
+
+	try {
+		return await cachedAuthHeadersPromise;
+	} finally {
+		cachedAuthHeadersPromise = null;
+	}
+}
+
+async function queryStats(normalizedPath?: string): Promise<UmamiStats> {
+	const websiteId = getWebsiteId();
+	const headers = await getAuthHeaders();
+
 	const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
-		`${getBaseUrl()}/api/websites/${websiteId}/stats?${search.toString()}`,
+		buildStatsUrl(websiteId, normalizedPath),
 		{
 			method: "GET",
-			headers: {
-				"x-umami-share-token": token,
-			},
+			headers,
 		},
 	);
 
@@ -156,18 +202,17 @@ function shouldRetryWithTrailingSlash(path: string, stats: UmamiStats) {
 	return stats.pageviews === 0 && stats.visits === 0 && path.length > 1;
 }
 
-export async function getSiteStats() {
-	if (!umamiConfig.enable) {
-		throw new Error("Umami is disabled");
-	}
+function toggleTrailingSlash(path: string) {
+	return path.endsWith("/") ? path.slice(0, -1) : `${path}/`;
+}
 
+export async function getSiteStats() {
+	ensureUmamiEnabled();
 	return queryStats();
 }
 
 export async function getPathStats(path: string) {
-	if (!umamiConfig.enable) {
-		throw new Error("Umami is disabled");
-	}
+	ensureUmamiEnabled();
 
 	const normalized = normalizePath(path);
 	const primary = await queryStats(normalized);
@@ -176,9 +221,5 @@ export async function getPathStats(path: string) {
 		return primary;
 	}
 
-	const altPath = normalized.endsWith("/")
-		? normalized.slice(0, -1)
-		: `${normalized}/`;
-
-	return queryStats(altPath);
+	return queryStats(toggleTrailingSlash(normalized));
 }

@@ -49,6 +49,21 @@ A static blog template built with [Astro](https://astro.build).
 4. Run `pnpm new-post <filename>` to create a new post and edit it in `src/content/posts/`.
 5. Deploy your blog to Vercel, Netlify, GitHub Pages, etc. following [the guides](https://docs.astro.build/en/guides/deploy/). You need to edit the site configuration in `astro.config.mjs` before deployment.
 
+### Umami configuration
+
+If you want Umami tracking and stats in production, configure these environment variables on your deployment platform:
+
+| Variable | Purpose |
+|:--|:--|
+| `UMAMI_BASE_URL` | Your Umami instance URL, for example `https://umami.example.com` |
+| `UMAMI_WEBSITE_ID` | Your Umami website ID used for tracking and stats queries |
+| `UMAMI_SHARE_URL` | Optional public stats link shown in the navbar |
+| `UMAMI_API_KEY` | Umami Cloud API key |
+| `UMAMI_AUTH_TOKEN` | Optional bearer token for self-hosted Umami |
+| `UMAMI_USERNAME` / `UMAMI_PASSWORD` | Optional self-hosted login fallback |
+
+Copy `.env.example` as a starting point if you want a local template.
+
 ## 📝 Frontmatter of Posts
 
 ```yaml

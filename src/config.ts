@@ -10,6 +10,14 @@ import type {
 } from "./types/config";
 import { LinkPreset } from "./types/config";
 
+function getEnv(name: string) {
+	return process.env[name]?.trim() || "";
+}
+
+const umamiBaseUrl = getEnv("UMAMI_BASE_URL");
+const umamiWebsiteId = getEnv("UMAMI_WEBSITE_ID");
+const umamiShareUrl = getEnv("UMAMI_SHARE_URL");
+
 export const siteConfig: SiteConfig = {
 	title: "Fuwari",
 	subtitle: "糖的小破站",
@@ -52,11 +60,15 @@ export const navBarConfig: NavBarConfig = {
 			url: "https://status.lvcdy.cn", // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab
 		},
-		{
-			name: "统计",
-			url: "https://umami.lvcdy.cn/share/E5uPmBmTf8auON6m", // Internal links should not include the base path, as it is automatically added
-			external: true, // Show an external link icon and will open in a new tab
-		},
+		...(umamiShareUrl
+			? [
+					{
+						name: "统计",
+						url: umamiShareUrl,
+						external: true,
+					},
+				]
+			: []),
 	],
 };
 
@@ -98,16 +110,21 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 };
 
 export const umamiConfig: UmamiConfig = {
-	enable: true,
+	enable: Boolean(umamiBaseUrl && umamiWebsiteId),
 	// For Umami Cloud use: https://cloud.umami.is
 	// For self-hosted use your domain, e.g. https://umami.example.com
-	baseUrl: "https://umami.lvcdy.cn",
-	// Your Umami website ID (UUID). Set this to enable tracking.
-	shareId: "385ac4ab-cae2-4d49-ad8b-87db42122a61",
-	// Public share page slug used to query read-only stats.
-	shareSlug: "E5uPmBmTf8auON6m",
+	baseUrl: umamiBaseUrl,
+	// Your Umami website ID (UUID). Set this to enable tracking and stats queries.
+	websiteId: umamiWebsiteId,
 	// Optional: timezone for share pages or reporting
 	timezone: "Asia/Shanghai",
+	// Official auth options:
+	// - Umami Cloud: set UMAMI_API_KEY
+	// - Self-hosted: set UMAMI_USERNAME and UMAMI_PASSWORD, or UMAMI_AUTH_TOKEN
+	apiKey: getEnv("UMAMI_API_KEY"),
+	authToken: getEnv("UMAMI_AUTH_TOKEN"),
+	username: getEnv("UMAMI_USERNAME"),
+	password: getEnv("UMAMI_PASSWORD"),
 };
 
 // Text color adaptive configuration

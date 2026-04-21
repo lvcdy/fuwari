@@ -1,0 +1,60 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+	nav: {
+		nextTitle?: string;
+		nextUrl?: string;
+		prevTitle?: string;
+		prevUrl?: string;
+	};
+}
+
+const { nav } = Astro.props;
+const { nextTitle, nextUrl, prevTitle, prevUrl } = nav;
+const navItems = [
+	{
+		title: nextTitle,
+		url: nextUrl,
+		alignment: "justify-start",
+		icon: "material-symbols:chevron-left-rounded",
+	},
+	{
+		title: prevTitle,
+		url: prevUrl,
+		alignment: "justify-end",
+		icon: "material-symbols:chevron-right-rounded",
+	},
+] as const;
+---
+
+<div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
+	{navItems.map((item) => (
+		<a
+			href={item.url || "#"}
+			class:list={[
+				"w-full font-bold overflow-hidden active:scale-95",
+				{ "pointer-events-none": !item.url },
+			]}
+		>
+			{item.title && (
+				<div
+					class:list={[
+						"btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center gap-4",
+						item.alignment,
+					]}
+				>
+					{item.alignment === "justify-start" && (
+						<Icon name={item.icon} class="text-[2rem] text-[var(--primary)]" />
+					)}
+					<div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
+						{item.title}
+					</div>
+					{item.alignment === "justify-end" && (
+						<Icon name={item.icon} class="text-[2rem] text-[var(--primary)]" />
+					)}
+				</div>
+			)}
+		</a>
+	))}
+</div>

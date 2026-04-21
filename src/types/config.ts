@@ -101,9 +101,12 @@ export type ExpressiveCodeConfig = {
 export type UmamiConfig = {
 	enable: boolean;
 	baseUrl: string;
-	shareId: string;
-	shareSlug?: string;
+	websiteId: string;
 	timezone: string;
+	authToken?: string;
+	apiKey?: string;
+	username?: string;
+	password?: string;
 };
 
 export type BackgroundConfig = {

@@ -1,7 +1,18 @@
 ---
+import {
+	coerceStats,
+	formatStatCount,
+	safeGetPathStats,
+	safeGetSiteStats,
+} from "@/utils/stats";
+
 interface Props {
 	mode: "site" | "path";
 	path?: string;
+	initialStats?: {
+		visits?: number;
+		pageviews?: number;
+	};
 	compact?: boolean;
 	layout?: "default" | "profile";
 	class?: string;
@@ -13,6 +24,7 @@ interface Props {
 const {
 	mode,
 	path = "",
+	initialStats,
 	compact = false,
 	layout = "default",
 	class: className = "",
@@ -22,55 +34,89 @@ const {
 } = Astro.props;
 
 const rootId = `traffic-stats-${Math.random().toString(36).slice(2, 10)}`;
+
+type StatItem = {
+	key: "visits" | "pageviews";
+	label: string;
+};
+
+const statItems: StatItem[] = [
+	{ key: "visits", label: visitsLabel },
+	{ key: "pageviews", label: pageviewsLabel },
+];
+
+const endpoint =
+	mode === "site"
+		? "/api/stats/site.json"
+		: `/api/stats/post.json?${new URLSearchParams({ path }).toString()}`;
+
+const resolvedInitialStats = initialStats
+	? coerceStats(initialStats)
+	: mode === "site"
+		? await safeGetSiteStats()
+		: path
+			? await safeGetPathStats(path)
+			: coerceStats();
+
+const statValueByKey: Record<StatItem["key"], string> = {
+	visits: formatStatCount(resolvedInitialStats.visits),
+	pageviews: formatStatCount(resolvedInitialStats.pageviews),
+};
 ---
 
 <div
 	id={rootId}
 	class={className}
-	data-mode={mode}
-	data-path={path}
-	data-visits-label={visitsLabel}
-	data-pageviews-label={pageviewsLabel}
+	data-endpoint={endpoint}
 >
 	{layout === "profile" ? (
 		<div class="pt-3">
 			<div class="border-t border-dashed border-black/10 dark:border-white/[0.15] mb-3"></div>
 			<div class="grid grid-cols-2 gap-2.5">
-				<div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
-					<div class="text-[0.7rem] text-50 mb-0.5">{visitsLabel}</div>
-					<div class="text-base font-bold text-90" data-visits>--</div>
-				</div>
-				<div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
-					<div class="text-[0.7rem] text-50 mb-0.5">{pageviewsLabel}</div>
-					<div class="text-base font-bold text-90" data-pageviews>--</div>
-				</div>
+				{statItems.map((item) => (
+					<div class="text-center rounded-xl bg-[var(--btn-regular-bg)] py-2.5">
+						<div class="text-[0.7rem] text-50 mb-0.5">{item.label}</div>
+						<div
+							class="text-base font-bold text-90"
+							data-stat={item.key}
+						>
+							{statValueByKey[item.key]}
+						</div>
+					</div>
+				))}
 			</div>
 		</div>
 	) : compact ? (
 		<div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
-			<div class="flex items-center gap-1">
-				<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--primary)]"></span>
-				<span>
-					{visitsLabel}: <span data-visits>--</span>
-				</span>
-			</div>
-			<div class="flex items-center gap-1">
-				<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--primary)]"></span>
-				<span>
-					{pageviewsLabel}: <span data-pageviews>--</span>
-				</span>
-			</div>
+			{statItems.map((item) => (
+				<div class="flex items-center gap-1">
+					<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--primary)]"></span>
+					<span>
+						{item.label}:{" "}
+						<span
+							data-stat={item.key}
+						>
+							{statValueByKey[item.key]}
+						</span>
+					</span>
+				</div>
+			))}
 		</div>
 	) : (
 		<div class="card-base rounded-[var(--radius-large)] px-5 py-4 mb-4 onload-animation">
 			<div class="text-sm text-neutral-500 dark:text-neutral-400 mb-2">{title}</div>
 			<div class="flex flex-wrap gap-4">
-				<div class="text-black/80 dark:text-white/80 font-medium">
-					{visitsLabel}: <span class="text-[var(--primary)]" data-visits>--</span>
-				</div>
-				<div class="text-black/80 dark:text-white/80 font-medium">
-					{pageviewsLabel}: <span class="text-[var(--primary)]" data-pageviews>--</span>
-				</div>
+				{statItems.map((item) => (
+					<div class="text-black/80 dark:text-white/80 font-medium">
+						{item.label}:{" "}
+						<span
+							class="text-[var(--primary)]"
+							data-stat={item.key}
+						>
+							{statValueByKey[item.key]}
+						</span>
+					</div>
+				))}
 			</div>
 		</div>
 	)}
@@ -83,25 +129,25 @@ const rootId = `traffic-stats-${Math.random().toString(36).slice(2, 10)}`;
 
 		if (!(root instanceof HTMLElement)) return;
 
-		const visitsNode = root.querySelector("[data-visits]");
-		const pageviewsNode = root.querySelector("[data-pageviews]");
-		const mode = root.getAttribute("data-mode");
-		const path = root.getAttribute("data-path") || "";
+		const visitsNode = root.querySelector('[data-stat="visits"]');
+		const pageviewsNode = root.querySelector('[data-stat="pageviews"]');
+		const endpoint = root.getAttribute("data-endpoint") || "";
 		const formatter = new Intl.NumberFormat("zh-CN");
-
-		const endpoint =
-			mode === "site"
-				? "/api/stats/site.json"
-				: `/api/stats/post.json?path=${encodeURIComponent(path)}`;
 
 		const setText = (node, value) => {
 			if (node) node.textContent = value;
+		};
+
+		const setStats = (payload) => {
+			setText(visitsNode, formatter.format(Number(payload.visits) || 0));
+			setText(pageviewsNode, formatter.format(Number(payload.pageviews) || 0));
 		};
 
 		const load = async () => {
 			try {
 				const response = await fetch(endpoint, {
 					method: "GET",
+					cache: "no-store",
 					headers: {
 						accept: "application/json",
 					},
@@ -111,12 +157,7 @@ const rootId = `traffic-stats-${Math.random().toString(36).slice(2, 10)}`;
 					throw new Error("Failed to fetch stats");
 				}
 
-				const payload = await response.json();
-				setText(visitsNode, formatter.format(Number(payload.visits) || 0));
-				setText(
-					pageviewsNode,
-					formatter.format(Number(payload.pageviews) || 0),
-				);
+				setStats(await response.json());
 			} catch {
 				root.classList.add("hidden");
 			}
@@ -128,6 +169,17 @@ const rootId = `traffic-stats-${Math.random().toString(36).slice(2, 10)}`;
 			load();
 		}
 
-		document.addEventListener("astro:after-swap", load);
+		const handleAfterSwap = () => {
+			load();
+		};
+
+		document.addEventListener("astro:after-swap", handleAfterSwap);
+		document.addEventListener(
+			"astro:before-swap",
+			() => {
+				document.removeEventListener("astro:after-swap", handleAfterSwap);
+			},
+			{ once: true },
+		);
 	})();
 </script>

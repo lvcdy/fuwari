@@ -1,0 +1,33 @@
+---
+import License from "../misc/License.astro";
+import { normalizePostSlug } from "../../utils/url-utils";
+
+interface Props {
+	post: {
+		title: string;
+		slug: string;
+		pubDate: Date;
+		showLicense?: boolean;
+	};
+	class?: string;
+}
+
+const { post } = Astro.props;
+const { title, slug, pubDate, showLicense = true } = post;
+const className = Astro.props.class;
+---
+
+<section class:list={[className]}>
+	<div class="mb-6 markdown-content onload-animation">
+		<slot />
+	</div>
+
+	{showLicense && (
+		<License
+			title={title}
+			slug={normalizePostSlug(slug)}
+			pubDate={pubDate}
+			class="mb-6 rounded-xl license-container onload-animation"
+		/>
+	)}
+</section>
