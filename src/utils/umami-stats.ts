@@ -16,6 +16,10 @@ function getBaseUrl() {
 	return umamiConfig.baseUrl.replace(/\/+$/, "");
 }
 
+function isUmamiCloudBaseUrl() {
+	return getBaseUrl().startsWith("https://api.umami.is");
+}
+
 function toNumber(value: unknown) {
 	const numeric =
 		typeof value === "string" ? Number.parseInt(value, 10) : Number(value);
@@ -103,7 +107,8 @@ function buildStatsUrl(websiteId: string, normalizedPath?: string) {
 		search.set("path", normalizedPath);
 	}
 
-	return `${getBaseUrl()}/api/websites/${websiteId}/stats?${search.toString()}`;
+	const basePath = isUmamiCloudBaseUrl() ? "/websites" : "/api/websites";
+	return `${getBaseUrl()}${basePath}/${websiteId}/stats?${search.toString()}`;
 }
 
 function hasValue(value?: string) {
@@ -145,10 +150,19 @@ async function getAuthHeaderCandidates(): Promise<HeadersInit[]> {
 	const authToken = umamiConfig.authToken?.trim() || "";
 	const headersList: HeadersInit[] = [];
 
-	if (hasValue(apiKey)) {
+	if (isUmamiCloudBaseUrl()) {
+		if (!hasValue(apiKey)) {
+			throw new Error(
+				"Umami Cloud requires UMAMI_API_KEY and UMAMI_BASE_URL=https://api.umami.is/v1",
+			);
+		}
+
 		headersList.push({
 			"x-umami-api-key": apiKey,
 		});
+
+		cachedAuthHeadersList = headersList;
+		return headersList;
 	}
 
 	if (hasValue(umamiConfig.username) && hasValue(umamiConfig.password)) {
