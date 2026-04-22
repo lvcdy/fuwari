@@ -8,7 +8,6 @@ export type UmamiStats = {
 	totaltime: number;
 };
 
-const DEFAULT_RETRIES = 3;
 const REQUEST_TIMEOUT_MS = 6000;
 
 function getBaseUrl() {
@@ -44,37 +43,21 @@ function normalizePath(path: string) {
 	return normalizedPath;
 }
 
-async function fetchJsonWithRetry<T>(
-	url: string,
-	init: RequestInit,
-	retries = DEFAULT_RETRIES,
-): Promise<T> {
-	let lastError: unknown;
+async function fetchJson<T>(url: string, init: RequestInit): Promise<T> {
+	const response = await fetch(url, {
+		...init,
+		headers: {
+			accept: "application/json",
+			...init.headers,
+		},
+		signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+	});
 
-	for (let attempt = 0; attempt < retries; attempt++) {
-		try {
-			const response = await fetch(url, {
-				...init,
-				headers: {
-					accept: "application/json",
-					...init.headers,
-				},
-				signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-			});
-
-			if (!response.ok) {
-				throw new Error(`Umami request failed (${response.status})`);
-			}
-
-			return (await response.json()) as T;
-		} catch (error) {
-			lastError = error;
-		}
+	if (!response.ok) {
+		throw new Error(`Umami request failed (${response.status})`);
 	}
 
-	throw lastError instanceof Error
-		? lastError
-		: new Error("Failed to fetch Umami data");
+	return (await response.json()) as T;
 }
 
 function getWebsiteId() {
@@ -107,7 +90,7 @@ async function queryStats(normalizedPath?: string): Promise<UmamiStats> {
 		throw new Error("Missing Umami auth token");
 	}
 
-	const payload = await fetchJsonWithRetry<Partial<UmamiStats>>(
+	const payload = await fetchJson<Partial<UmamiStats>>(
 		buildStatsUrl(websiteId, normalizedPath),
 		{
 			method: "GET",

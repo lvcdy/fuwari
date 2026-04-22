@@ -183,11 +183,11 @@ if (backgroundConfig.type === "src") {
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
 		{umamiConfig.baseUrl && umamiConfig.websiteId && umamiConfig.authToken && (
-			<script is:inline defer src={`${umamiConfig.baseUrl.replace(/\/+$/, '')}/script.js`} data-website-id={umamiConfig.websiteId}></script>
+			<script is:inline defer src={`${umamiConfig.baseUrl.replace(/\/+$/, "")}/script.js`} data-website-id={umamiConfig.websiteId}></script>
 		)}
 
 		<!-- Text color adaptive script -->
-		<script define:vars={{enableAutoDetect: textColorConfig.enableAutoDetect, lightModeTextColor: textColorConfig.lightModeTextColor, darkModeTextColor: textColorConfig.darkModeTextColor, threshold: textColorConfig.threshold}}>
+		<script is:inline define:vars={{enableAutoDetect: textColorConfig.enableAutoDetect, lightModeTextColor: textColorConfig.lightModeTextColor, darkModeTextColor: textColorConfig.darkModeTextColor, threshold: textColorConfig.threshold}}>
 			import { applyAdaptiveTextColor } from '../utils/text-color';
 			import { initializePerformanceMonitoring, enableImageLazyLoading } from '../utils/performance';
 

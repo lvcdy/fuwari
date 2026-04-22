@@ -10,11 +10,11 @@ import type {
 } from "./types/config";
 import { LinkPreset } from "./types/config";
 import {
-	umamiAuthToken,
-	umamiBaseUrl,
-	umamiShareUrl,
-	umamiWebsiteId,
-} from "./config/umami";
+	UMAMI_AUTH_TOKEN,
+	UMAMI_BASE_URL,
+	UMAMI_SHARE_URL,
+	UMAMI_WEBSITE_ID,
+} from "./constants/constants";
 
 export const siteConfig: SiteConfig = {
 	title: "Fuwari",
@@ -58,11 +58,11 @@ export const navBarConfig: NavBarConfig = {
 			url: "https://status.lvcdy.cn", // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab
 		},
-		...(umamiShareUrl
+		...(UMAMI_SHARE_URL
 			? [
 					{
 						name: "统计",
-						url: umamiShareUrl,
+						url: UMAMI_SHARE_URL,
 						external: true,
 					},
 				]
@@ -108,10 +108,10 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 };
 
 export const umamiConfig: UmamiConfig = {
-	baseUrl: umamiBaseUrl,
-	websiteId: umamiWebsiteId,
+	baseUrl: UMAMI_BASE_URL,
+	websiteId: UMAMI_WEBSITE_ID,
 	timezone: "Asia/Shanghai",
-	authToken: umamiAuthToken,
+	authToken: UMAMI_AUTH_TOKEN,
 };
 
 // Text color adaptive configuration
