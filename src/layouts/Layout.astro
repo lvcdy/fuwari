@@ -1,9 +1,5 @@
 ---
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
-
-import { getImage } from "astro:assets";
+import { Font, getImage } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import {
@@ -114,10 +110,9 @@ if (backgroundConfig.type === "src") {
 		<meta charset="UTF-8" />
 		<meta name="description" content={description || pageTitle}>
 		<meta name="author" content={profileConfig.name}>
-		<!-- 性能优化：添加预连接和预加载 -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 		<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700">
+		<Font cssVariable="--font-roboto" preload={[{ weight: 400 }, { weight: 500 }, { weight: 700 }]} />
+		<Font cssVariable="--font-jetbrains-mono" />
 
 		<meta property="og:site_name" content={siteConfig.title}>
 		<meta property="og:url" content={Astro.url}>

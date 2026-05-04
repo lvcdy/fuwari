@@ -23,15 +23,13 @@
 		"@expressive-code/core": "^0.41.7",
 		"@expressive-code/plugin-collapsible-sections": "^0.41.7",
 		"@expressive-code/plugin-line-numbers": "^0.41.7",
-		"@fontsource-variable/jetbrains-mono": "^5.2.8",
-		"@fontsource/roboto": "^5.2.10",
 		"@iconify-json/fa6-brands": "^1.2.6",
 		"@iconify-json/fa6-regular": "^1.2.4",
 		"@iconify-json/fa6-solid": "^1.2.4",
-		"@iconify-json/material-symbols": "^1.2.67",
+		"@iconify-json/material-symbols": "^1.2.69",
 		"@iconify/svelte": "^5.2.1",
 		"@tailwindcss/typography": "^0.5.19",
-		"@tailwindcss/vite": "^4.2.3",
+		"@tailwindcss/vite": "^4.2.4",
 		"astro": "6.2.1",
 		"astro-expressive-code": "^0.41.7",
 		"astro-icon": "^1.1.5",
@@ -55,19 +53,19 @@
 		"sanitize-html": "^2.17.3",
 		"sharp": "^0.34.5",
 		"stylus": "^0.64.0",
-		"svelte": "^5.55.4",
-		"tailwindcss": "^4.2.3",
+		"svelte": "^5.55.5",
+		"tailwindcss": "^4.2.4",
 		"typescript": "^6.0.3",
 		"unist-util-visit": "^5.1.0"
 	},
 	"devDependencies": {
 		"@astrojs/ts-plugin": "^1.10.7",
-		"@biomejs/biome": "2.4.12",
+		"@biomejs/biome": "2.4.14",
 		"@types/hast": "^3.0.4",
 		"@types/markdown-it": "^14.1.2",
 		"@types/mdast": "^4.0.4",
 		"@types/sanitize-html": "^2.16.1",
 		"postcss-import": "^16.1.1"
 	},
-	"packageManager": "pnpm@9.14.4"
+	"packageManager": "pnpm@10.33.2"
 }

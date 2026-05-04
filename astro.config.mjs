@@ -3,7 +3,7 @@ import svelte from "@astrojs/svelte";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders, svgoOptimizer } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import path from "path";
@@ -34,12 +34,65 @@ export default defineConfig({
 	site: "https://blog.lvcdy.cn",
 	base: "/",
 	trailingSlash: "always",
-	// 性能优化：启用输出压缩
-	compressHTML: true,
+	// 性能优化：使用 Astro 6.2 的 JSX 空白压缩规则，保持 .astro 和 JSX 输出一致
+	compressHTML: "jsx",
+	devToolbar: {
+		placement: "bottom-left",
+	},
+	fonts: [
+		{
+			provider: fontProviders.fontsource(),
+			name: "Roboto",
+			cssVariable: "--font-roboto",
+			weights: [400, 500, 700],
+			styles: ["normal"],
+			fallbacks: ["ui-sans-serif", "system-ui", "sans-serif"],
+		},
+		{
+			provider: fontProviders.fontsource(),
+			name: "JetBrains Mono",
+			cssVariable: "--font-jetbrains-mono",
+			weights: ["100 800"],
+			styles: ["normal", "italic"],
+			fallbacks: ["ui-monospace", "monospace"],
+		},
+	],
+	experimental: {
+		svgOptimizer: svgoOptimizer({
+			plugins: [
+				{
+					name: "preset-default",
+					params: {
+						overrides: {
+							removeViewBox: false,
+						},
+					},
+				},
+			],
+		}),
+	},
 	// 性能优化：优化图像处理
 	image: {
 		service: {
 			entrypoint: "astro/assets/services/sharp",
+			config: {
+				kernel: "mks2021",
+				jpeg: {
+					mozjpeg: true,
+					progressive: true,
+				},
+				webp: {
+					effort: 6,
+					alphaQuality: 80,
+				},
+				avif: {
+					effort: 4,
+					chromaSubsampling: "4:2:0",
+				},
+				png: {
+					compressionLevel: 9,
+				},
+			},
 		},
 	},
 	integrations: [
@@ -72,7 +125,7 @@ export default defineConfig({
 				borderColor: "none",
 				codeFontSize: "0.875rem",
 				codeFontFamily:
-					"'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
 				codeLineHeight: "1.5rem",
 				frames: {
 					editorBackground: "var(--codeblock-bg)",
