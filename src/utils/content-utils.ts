@@ -1,7 +1,12 @@
 import { type CollectionEntry, getCollection } from "astro:content";
+import { readFile } from "node:fs/promises";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl, normalizePostSlug } from "@utils/url-utils";
+
+function stripFrontmatter(markdown: string): string {
+	return markdown.replace(/^(---|\+\+\+)\r?\n[\s\S]*?\r?\n\1\r?\n?/, "");
+}
 
 /**
  * Generic function to create a count map from items
@@ -87,6 +92,19 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 	}));
 
 	return sortedPostsList;
+}
+
+export async function getPostBody(post: CollectionEntry<"posts">): Promise<string> {
+	if (typeof post.body === "string" && post.body.length > 0) {
+		return post.body;
+	}
+
+	if (!post.filePath) {
+		return "";
+	}
+
+	const source = await readFile(post.filePath, "utf-8");
+	return stripFrontmatter(source);
 }
 
 export type Tag = {

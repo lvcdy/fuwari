@@ -16,7 +16,7 @@ import remarkDirective from "remark-directive"; /* Handle directives */
 import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-directives";
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
-import { expressiveCodeConfig } from "./src/config.ts";
+import { expressiveCodeConfig, umamiConfig } from "./src/config.ts";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { AdmonitionComponent } from "./src/plugins/rehype-component-admonition.mjs";
@@ -29,11 +29,41 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function getOrigin(value) {
+	try {
+		return value ? new URL(value).origin : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+const umamiOrigin = getOrigin(umamiConfig.baseUrl);
+
 // https://astro.build/config
 export default defineConfig({
 	site: "https://blog.lvcdy.cn",
 	base: "/",
 	trailingSlash: "always",
+	security: {
+		csp: {
+			directives: [
+				"default-src 'self'",
+				"base-uri 'self'",
+				"object-src 'none'",
+				"frame-ancestors 'self'",
+				"form-action 'self'",
+				"img-src 'self' data: blob: https:",
+				"font-src 'self' data:",
+				`connect-src 'self'${umamiOrigin ? ` ${umamiOrigin}` : ""}`,
+			],
+			scriptDirective: {
+				resources: ["'self'", ...(umamiOrigin ? [umamiOrigin] : [])],
+			},
+			styleDirective: {
+				resources: ["'self'"],
+			},
+		},
+	},
 	// 性能优化：使用 Astro 6.2 的 JSX 空白压缩规则，保持 .astro 和 JSX 输出一致
 	compressHTML: "jsx",
 	devToolbar: {
@@ -58,6 +88,9 @@ export default defineConfig({
 		},
 	],
 	experimental: {
+		queuedRendering: {
+			enabled: true,
+		},
 		svgOptimizer: svgoOptimizer({
 			plugins: [
 				{

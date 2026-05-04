@@ -1,5 +1,5 @@
 import rss from "@astrojs/rss";
-import { getSortedPosts } from "@utils/content-utils";
+import { getPostBody, getSortedPosts } from "@utils/content-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
 import type { APIContext } from "astro";
 import MarkdownIt from "markdown-it";
@@ -18,15 +18,9 @@ function stripInvalidXmlChars(str: string): string {
 
 export async function GET(context: APIContext) {
 	const blog = await getSortedPosts();
-
-	return rss({
-		title: siteConfig.title,
-		description: siteConfig.subtitle || "No description",
-		site: context.site ?? "https://fuwari.vercel.app",
-		items: blog.map((post) => {
-			const content =
-				typeof post.body === "string" ? post.body : String(post.body || "");
-			const cleanedContent = stripInvalidXmlChars(content);
+	const items = await Promise.all(
+		blog.map(async (post) => {
+			const cleanedContent = stripInvalidXmlChars(await getPostBody(post));
 			return {
 				title: post.data.title,
 				pubDate: post.data.published,
@@ -37,6 +31,13 @@ export async function GET(context: APIContext) {
 				}),
 			};
 		}),
+	);
+
+	return rss({
+		title: siteConfig.title,
+		description: siteConfig.subtitle || "No description",
+		site: context.site ?? "https://fuwari.vercel.app",
+		items,
 		customData: `<language>${siteConfig.lang}</language>`,
 	});
 }

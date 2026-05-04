@@ -6,6 +6,7 @@ const postsCollection = defineCollection({
 	loader: glob({
 		base: "./src/content/posts",
 		pattern: "**/*.{md,mdx}",
+		retainBody: false,
 	}),
 	schema: z.object({
 		title: z.string(),
@@ -32,6 +33,7 @@ const specCollection = defineCollection({
 	loader: glob({
 		base: "./src/content/spec",
 		pattern: "**/*.{md,mdx}",
+		retainBody: false,
 	}),
 	schema: z.object({}),
 });
