@@ -5,7 +5,7 @@ import {
 	filterArchivePosts,
 	groupArchivePosts,
 	type ArchiveFilters,
-	type ArchiveGroup,
+	type ArchiveGroup as ArchiveGroupType,
 	type ArchivePost,
 } from "../utils/archive-utils";
 
@@ -13,7 +13,7 @@ export let sortedPosts: ArchivePost[] = [];
 
 let archiveFilters = getArchiveFilters();
 let filteredPosts: ArchivePost[] = [];
-let groups: ArchiveGroup[] = [];
+let groups: ArchiveGroupType[] = [];
 
 function getArchiveFilters(): ArchiveFilters {
 	const params = new URLSearchParams(window.location.search);

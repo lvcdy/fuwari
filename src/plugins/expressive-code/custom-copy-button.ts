@@ -46,7 +46,7 @@ export function pluginCustomCopyButton() {
 								],
 							},
 						],
-					} as Element;
+					} as unknown as Element;
 
 					if (!node.children) {
 						node.children = [];
