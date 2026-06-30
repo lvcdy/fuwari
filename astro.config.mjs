@@ -176,6 +176,8 @@ export default defineConfig({
 		sitemap(),
 	],
 	markdown: {
+		// Expressive Code 接管了语法高亮，显式禁用 Astro 内置 Shiki 避免 CSP 警告
+		syntaxHighlight: false,
 		processor: unified({
 			remarkPlugins: [
 				remarkMath,
