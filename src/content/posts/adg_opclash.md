@@ -16,11 +16,11 @@ OpenClash是在Openwrt上我的最好的插件之一，如何将其与AdGuardHom
 
 点击添加，设置名称与订阅。（_若机场不支持Clash，可以使用下方的在线订阅转换_，**但请注意，在线订阅转换有泄露订阅地址的风险，请慎重使用。**）填写完毕后更新即可。
 
-![image-20230102154019758.png](https://github.com/laorentou666/picx-images-hosting/raw/master/%E6%B5%85%E8%B0%88%20OpenClash%20%E4%B8%8E%20ADGuard%20Home%20%E7%9A%84%E7%BB%84%E5%90%88/opsubscribe.webp)
+![image-20230102154019758.png](/files/adg_openclash/opsubscribe.webp)
 
 接下来前往全局设置，DNS设置。关闭本地DNS劫持，打开自定义上游DNS服务器。在下方的列表中有DNS列表。若无特殊需要保持默认即可。最后保存并应用。
 
-![image-20230102154054241.png](https://github.com/laorentou666/picx-images-hosting/raw/master/%E6%B5%85%E8%B0%88%20OpenClash%20%E4%B8%8E%20ADGuard%20Home%20%E7%9A%84%E7%BB%84%E5%90%88/opclashlocaldns.webp)![image-20230102154128689.png](https://github.com/laorentou666/picx-images-hosting/raw/master/%E6%B5%85%E8%B0%88%20OpenClash%20%E4%B8%8E%20ADGuard%20Home%20%E7%9A%84%E7%BB%84%E5%90%88/opnameserver.webp)
+![image-20230102154054241.png](/files/adg_openclash/opclashlocaldns.webp)![image-20230102154128689.png](/files/adg_openclash/opnameserver.webp)
 
 至此，OpenClash设置部分结束。
 
@@ -30,7 +30,7 @@ OpenClash是在Openwrt上我的最好的插件之一，如何将其与AdGuardHom
 
 配置完成后，启用ADGuard Home。 5553重定向修改为“作为dnsmasq的上游服务器”。
 
-![image-20230102154156468.png|606](https://github.com/laorentou666/picx-images-hosting/raw/master/%E6%B5%85%E8%B0%88%20OpenClash%20%E4%B8%8E%20ADGuard%20Home%20%E7%9A%84%E7%BB%84%E5%90%88/adgconfig.webp)
+![image-20230102154156468.png|606](/files/adg_openclash/adgconfig.webp)
 
 进入ADGuard Home后台。进入设置，DNS设置。修改上游DNS服务器为
 
@@ -41,7 +41,7 @@ OpenClash是在Openwrt上我的最好的插件之一，如何将其与AdGuardHom
 
 下方选择并行请求。
 
-![image-20230102154240861.png](https://github.com/laorentou666/picx-images-hosting/raw/master/%E6%B5%85%E8%B0%88%20OpenClash%20%E4%B8%8E%20ADGuard%20Home%20%E7%9A%84%E7%BB%84%E5%90%88/adguraddns.webp)
+![image-20230102154240861.png](/files/adg_openclash/adguraddns.webp)
 
 Bootstrap DNS 服务器填写你本地区的DNS（_若不知晓本地区的DNS，可自行搜索。_）
 
