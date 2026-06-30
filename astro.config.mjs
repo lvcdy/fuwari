@@ -1,14 +1,13 @@
+import path from "node:path";
+import { unified } from "@astrojs/markdown-remark";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders, svgoOptimizer } from "astro/config";
-import { unified } from "@astrojs/markdown-remark";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-import path from "path";
-import { fileURLToPath } from "url";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeComponents from "rehype-components"; /* Render the custom directive content */
 import rehypeKatex from "rehype-katex";
@@ -25,10 +24,6 @@ import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.
 import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 function getOrigin(value) {
 	try {
@@ -255,13 +250,13 @@ export default defineConfig({
 		// 路径别名配置
 		resolve: {
 			alias: {
-				"@": path.resolve(__dirname, "./src"),
-				"@components": path.resolve(__dirname, "./src/components"),
-				"@assets": path.resolve(__dirname, "./src/assets"),
-				"@constants": path.resolve(__dirname, "./src/constants"),
-				"@utils": path.resolve(__dirname, "./src/utils"),
-				"@i18n": path.resolve(__dirname, "./src/i18n"),
-				"@layouts": path.resolve(__dirname, "./src/layouts"),
+				"@": path.resolve(import.meta.dirname, "./src"),
+				"@components": path.resolve(import.meta.dirname, "./src/components"),
+				"@assets": path.resolve(import.meta.dirname, "./src/assets"),
+				"@constants": path.resolve(import.meta.dirname, "./src/constants"),
+				"@utils": path.resolve(import.meta.dirname, "./src/utils"),
+				"@i18n": path.resolve(import.meta.dirname, "./src/i18n"),
+				"@layouts": path.resolve(import.meta.dirname, "./src/layouts"),
 			},
 		},
 	},
