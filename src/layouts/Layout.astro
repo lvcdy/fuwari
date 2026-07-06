@@ -101,6 +101,21 @@ if (backgroundConfig.type === "src") {
 <!DOCTYPE html>
 <html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
 	  data-overlayscrollbars-initialize
+	  data-config-hue={configHue}
+	  data-bg-url={resolvedBackgroundUrl}
+	  data-page-width={PAGE_WIDTH}
+	  data-banner-offset={bannerOffset}
+	  data-banner-height-home={BANNER_HEIGHT_HOME}
+	  data-banner-height={BANNER_HEIGHT}
+	  data-banner-height-extend={BANNER_HEIGHT_EXTEND}
+	  data-default-theme={DEFAULT_THEME}
+	  data-light-mode={LIGHT_MODE}
+	  data-dark-mode={DARK_MODE}
+	  data-auto-mode={AUTO_MODE}
+	  data-enable-auto-detect={textColorConfig.enableAutoDetect}
+	  data-light-mode-text-color={textColorConfig.lightModeTextColor}
+	  data-dark-mode-text-color={textColorConfig.darkModeTextColor}
+	  data-text-threshold={textColorConfig.threshold}
 >
 	<head>
 		<ClientRouter />
@@ -140,37 +155,67 @@ if (backgroundConfig.type === "src") {
 		))}
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
-		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
-			// Load the theme from local storage
-			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
-			switch (theme) {
-				case LIGHT_MODE:
-					document.documentElement.classList.remove('dark');
-					break
-				case DARK_MODE:
-					document.documentElement.classList.add('dark');
-					break
-				case AUTO_MODE:
+		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue, bgUrl: resolvedBackgroundUrl, bannerOffset, bannerHeightHome: BANNER_HEIGHT_HOME, bannerHeight: BANNER_HEIGHT}}>
+			const root = document.documentElement;
+
+			/**
+			 * Re-apply theme + CSS variables.
+			 * Reads from data-* attributes so the values survive ClientRouter page swaps.
+			 */
+			function applyThemeAndVars() {
+				const el = document.documentElement;
+				const defTheme = el.dataset.defaultTheme || 'auto';
+				const lightMode = el.dataset.lightMode || 'light';
+				const darkMode = el.dataset.darkMode || 'dark';
+				const autoMode = el.dataset.autoMode || 'auto';
+				const cfgHue = el.dataset.configHue || '250';
+				const bg = el.dataset.bgUrl || '';
+				const pw = el.dataset.pageWidth || '75';
+				const bOff = el.dataset.bannerOffset || '0';
+				const bHH = el.dataset.bannerHeightHome || '65';
+				const bH = el.dataset.bannerHeight || '35';
+				const bHE = el.dataset.bannerHeightExtend || '20';
+
+				// Theme
+				const theme = localStorage.getItem('theme') || defTheme;
+				if (theme === lightMode) {
+					el.classList.remove('dark');
+				} else if (theme === darkMode) {
+					el.classList.add('dark');
+				} else if (theme === autoMode) {
 					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						document.documentElement.classList.add('dark');
+						el.classList.add('dark');
 					} else {
-						document.documentElement.classList.remove('dark');
+						el.classList.remove('dark');
 					}
+				}
+
+				// Hue
+				const hue = localStorage.getItem('hue') || cfgHue;
+				el.style.setProperty('--hue', hue);
+				el.style.setProperty('--configHue', cfgHue);
+
+				// Layout & background
+				el.style.setProperty('--page-width', `${pw}rem`);
+				el.style.setProperty('--bg-url', `url('${bg}')`);
+				el.style.setProperty('--bannerOffset', bOff);
+				el.style.setProperty('--banner-height-home', `${bHH}vh`);
+				el.style.setProperty('--banner-height', `${bH}vh`);
+
+				// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+				let offset = Math.floor(window.innerHeight * (parseFloat(bHE) / 100));
+				offset = offset - offset % 4;
+				el.style.setProperty('--banner-height-extend', `${offset}px`);
 			}
 
-			// Load the hue from local storage
-			const hue = localStorage.getItem('hue') || configHue;
-			document.documentElement.style.setProperty('--hue', hue);
+			// Apply immediately on first load
+			applyThemeAndVars();
 
-			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-			let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-			offset = offset - offset % 4;
-			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+			// Re-apply after every ClientRouter page swap (fires before astro:page-load)
+			document.addEventListener('astro:after-swap', applyThemeAndVars);
+			// Re-apply on every page load as a safety net
+			document.addEventListener('astro:page-load', applyThemeAndVars);
 		</script>
-		<style define:vars={{
-			configHue,
-			'page-width': `${PAGE_WIDTH}rem`,
-		}}></style>  <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
 
 		<slot name="head"></slot>
@@ -182,13 +227,19 @@ if (backgroundConfig.type === "src") {
 		)}
 
 		<!-- Text color adaptive script -->
-		<script is:inline define:vars={{enableAutoDetect: textColorConfig.enableAutoDetect, lightModeTextColor: textColorConfig.lightModeTextColor, darkModeTextColor: textColorConfig.darkModeTextColor, threshold: textColorConfig.threshold}}>
+		<script>
 			import { applyAdaptiveTextColor } from '../utils/text-color';
 			import { initializePerformanceMonitoring, enableImageLazyLoading } from '../utils/performance';
 
+			const root = document.documentElement;
+			const enableAutoDetect = root.dataset.enableAutoDetect === 'true';
+			const lightModeTextColor = root.dataset.lightModeTextColor || 'rgb(30, 30, 30)';
+			const darkModeTextColor = root.dataset.darkModeTextColor || 'rgb(245, 245, 245)';
+			const threshold = parseInt(root.dataset.textThreshold || '128', 10);
+
 			const initializeClientFeatures = () => {
 				if (enableAutoDetect) {
-					const bgUrl = document.documentElement.style.getPropertyValue('--bg-url');
+					const bgUrl = root.style.getPropertyValue('--bg-url');
 					if (bgUrl) {
 						const url = bgUrl.slice(5, -2); // Remove url(' and ')
 						applyAdaptiveTextColor(url, {
@@ -208,13 +259,7 @@ if (backgroundConfig.type === "src") {
 				initializeClientFeatures();
 			};
 
-			const handleBeforeSwap = () => {
-				document.removeEventListener('astro:page-load', handlePageLoad);
-				document.removeEventListener('astro:before-swap', handleBeforeSwap);
-			};
-
 			document.addEventListener('astro:page-load', handlePageLoad);
-			document.addEventListener('astro:before-swap', handleBeforeSwap, { once: true });
 		</script>
 
 	</head>
@@ -229,12 +274,7 @@ if (backgroundConfig.type === "src") {
 	</body>
 </html>
 
-<style is:global define:vars={{
-	bannerOffset,
-	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
-	'banner-height': `${BANNER_HEIGHT}vh`,
-	'bg-url': `url('${resolvedBackgroundUrl}')`,
-}}>
+<style is:global>
 html {
 	height: 100%;
 	background-image: var(--bg-url);

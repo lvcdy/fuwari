@@ -75,13 +75,13 @@ function toggleExpand() {
 </script>
 
 <div class={`card-base p-3 ${className}`} {style}>
-  <div class="flex justify-between items-center cursor-pointer mb-3" on:click={toggleExpand}>
+  <button class="flex justify-between items-center cursor-pointer mb-3 w-full bg-transparent border-none p-0" on:click={toggleExpand}>
     <h3 class="font-bold text-lg transition">统计信息</h3>
     <Icon
       icon={isExpanded ? 'material-symbols:expand-less' : 'material-symbols:expand-more'}
       class="text-[1.5rem] transition"
     />
-  </div>
+  </button>
 
   {#if isExpanded}
     <div class="grid grid-cols-2 gap-2.5 mb-3">
