@@ -88,6 +88,18 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 };
 
 onMount(() => {
+	let timeoutId: ReturnType<typeof setTimeout> | undefined;
+	const handlePagefindReady = () => {
+		console.log("Pagefind ready event received.");
+		initializeSearch();
+	};
+	const handlePagefindLoadError = () => {
+		console.warn(
+			"Pagefind load error event received. Search functionality will be limited.",
+		);
+		initializeSearch();
+	};
+
 	const initializeSearch = () => {
 		initialized = true;
 		pagefindLoaded = !!getPagefindClient();
@@ -102,24 +114,24 @@ onMount(() => {
 		);
 		initializeSearch();
 	} else {
-		document.addEventListener("pagefindready", () => {
-			console.log("Pagefind ready event received.");
-			initializeSearch();
-		});
-		document.addEventListener("pagefindloaderror", () => {
-			console.warn(
-				"Pagefind load error event received. Search functionality will be limited.",
-			);
-			initializeSearch();
-		});
+		document.addEventListener("pagefindready", handlePagefindReady);
+		document.addEventListener("pagefindloaderror", handlePagefindLoadError);
 
 		// Fallback in case events are not caught or pagefind is already loaded by the time this script runs
-		setTimeout(() => {
+		timeoutId = setTimeout(() => {
 			if (!initialized) {
 				console.log("Fallback: Initializing search after timeout.");
 				initializeSearch();
 			}
 		}, 2000);
+
+		return () => {
+			document.removeEventListener("pagefindready", handlePagefindReady);
+			document.removeEventListener("pagefindloaderror", handlePagefindLoadError);
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+		};
 	}
 });
 

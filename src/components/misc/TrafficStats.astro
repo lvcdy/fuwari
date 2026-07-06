@@ -163,23 +163,16 @@ const statValueByKey: Record<StatItem["key"], string> = {
 			}
 		};
 
-		if (document.readyState === "loading") {
-			document.addEventListener("DOMContentLoaded", load, { once: true });
-		} else {
-			load();
-		}
-
-		const handleAfterSwap = () => {
+		const handlePageLoad = () => {
 			load();
 		};
 
-		document.addEventListener("astro:after-swap", handleAfterSwap);
-		document.addEventListener(
-			"astro:before-swap",
-			() => {
-				document.removeEventListener("astro:after-swap", handleAfterSwap);
-			},
-			{ once: true },
-		);
+		const handleBeforeSwap = () => {
+			document.removeEventListener("astro:page-load", handlePageLoad);
+			document.removeEventListener("astro:before-swap", handleBeforeSwap);
+		};
+
+		document.addEventListener("astro:page-load", handlePageLoad);
+		document.addEventListener("astro:before-swap", handleBeforeSwap, { once: true });
 	})();
 </script>

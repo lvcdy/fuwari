@@ -145,9 +145,5 @@ async function loadPagefind() {
     }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadPagefind);
-} else {
-    loadPagefind();
-}
+document.addEventListener('astro:page-load', loadPagefind);
 </script>}

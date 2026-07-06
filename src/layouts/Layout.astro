@@ -204,11 +204,17 @@ if (backgroundConfig.type === "src") {
 				enableImageLazyLoading();
 			};
 
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', initializeClientFeatures, { once: true });
-			} else {
+			const handlePageLoad = () => {
 				initializeClientFeatures();
-			}
+			};
+
+			const handleBeforeSwap = () => {
+				document.removeEventListener('astro:page-load', handlePageLoad);
+				document.removeEventListener('astro:before-swap', handleBeforeSwap);
+			};
+
+			document.addEventListener('astro:page-load', handlePageLoad);
+			document.addEventListener('astro:before-swap', handleBeforeSwap, { once: true });
 		</script>
 
 	</head>

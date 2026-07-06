@@ -91,9 +91,5 @@ const currentYear = new Date().getFullYear();
     fetchAndDetectProvider(proName, proBox);
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initProviderDetection, { once: true });
-  } else {
-    initProviderDetection();
-  }
+  document.addEventListener("astro:page-load", initProviderDetection);
 </script>
