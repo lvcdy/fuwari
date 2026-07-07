@@ -28,7 +28,9 @@ export const getImageBrightness = (imageUrl: string): Promise<number> => {
 
 	return new Promise((resolve) => {
 		const img = new Image();
-		img.crossOrigin = "anonymous";
+		// 不设置 crossOrigin，避免 CORS 错误
+		// 如果服务器支持 CORS，可以在 canvas 中读取像素
+		// 如果不支持，catch 会捕获 tainted canvas 错误并静默回退
 
 		img.onload = () => {
 			try {
@@ -38,7 +40,8 @@ export const getImageBrightness = (imageUrl: string): Promise<number> => {
 
 				const ctx = canvas.getContext("2d");
 				if (!ctx) {
-					resolve(128);
+					// 无法获取 canvas 上下文，假设背景较亮，使用深色文字
+					resolve(200);
 					return;
 				}
 
@@ -75,15 +78,15 @@ export const getImageBrightness = (imageUrl: string): Promise<number> => {
 				brightness = Math.floor(brightness / pixelCount);
 				brightnessCache.set(imageUrl, brightness);
 				resolve(brightness);
-			} catch (error) {
-				console.warn("Failed to calculate image brightness:", error);
-				resolve(128);
+			} catch {
+				// Tainted canvas 错误（服务器不支持 CORS）- 假设背景较亮，使用深色文字
+				resolve(200);
 			}
 		};
 
 		img.onerror = () => {
-			console.warn("Failed to load image for brightness detection:", imageUrl);
-			resolve(128);
+			// 图片加载失败 - 假设背景较亮，使用深色文字
+			resolve(200);
 		};
 
 		img.src = imageUrl;
@@ -110,19 +113,28 @@ export const applyAdaptiveTextColor = async (
 	if (!config.enableAutoDetect) return;
 
 	try {
+		const root = document.documentElement;
+		const isDark = root.classList.contains("dark");
+
+		// 暗色模式直接使用浅色文字，不需要亮度检测
+		if (isDark) {
+			root.style.setProperty("--adaptive-text-color", config.darkModeTextColor);
+			return;
+		}
+
+		// 亮色模式进行亮度检测
 		const brightness = await getImageBrightness(imageUrl);
 		const useDarkText = shouldUseDarkText(brightness, config.threshold);
 
 		const color = useDarkText
 			? config.lightModeTextColor
 			: config.darkModeTextColor;
-		document.documentElement.style.setProperty("--adaptive-text-color", color);
+		root.style.setProperty("--adaptive-text-color", color);
 	} catch {
-		// Fallback to default
-		const defaultColor = config.darkModeTextColor;
+		// 亮度检测失败时，使用浅色文字（深色），避免在浅色背景上显示白色文字
 		document.documentElement.style.setProperty(
 			"--adaptive-text-color",
-			defaultColor,
+			config.lightModeTextColor,
 		);
 	}
 };
