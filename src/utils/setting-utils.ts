@@ -47,9 +47,9 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 	// 根据主题更新自适应文字颜色
 	const root = document.documentElement;
 	const isDark = root.classList.contains("dark");
-	const lightModeTextColor = root.dataset.lightModeTextColor || "rgb(30, 30, 30)";
+	const _lightModeTextColor = root.dataset.lightModeTextColor || "rgb(30, 30, 30)";
 	const darkModeTextColor = root.dataset.darkModeTextColor || "rgb(245, 245, 245)";
-	
+
 	// 暗色模式使用浅色文字，亮色模式保持自适应
 	if (isDark) {
 		root.style.setProperty("--adaptive-text-color", darkModeTextColor);
