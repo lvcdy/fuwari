@@ -5,7 +5,7 @@ import svelte from "@astrojs/svelte";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, fontProviders, svgoOptimizer } from "astro/config";
+import { defineConfig, envField, fontProviders, memoryCache, svgoOptimizer } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -16,7 +16,7 @@ import remarkDirective from "remark-directive"; /* Handle directives */
 import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-directives";
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
-import { expressiveCodeConfig, umamiConfig } from "./src/config.ts";
+import { expressiveCodeConfig } from "./src/config.ts";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { AdmonitionComponent } from "./src/plugins/rehype-component-admonition.mjs";
@@ -25,40 +25,23 @@ import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
-function getOrigin(value) {
-	try {
-		return value ? new URL(value).origin : undefined;
-	} catch {
-		return undefined;
-	}
-}
-
-const umamiOrigin = getOrigin(umamiConfig.baseUrl);
-
 // https://astro.build/config
 export default defineConfig({
 	site: "https://blog.lvcdy.cn",
 	base: "/",
 	trailingSlash: "always",
-	security: {
-		csp: {
-			directives: [
-				"default-src 'self'",
-				"base-uri 'self'",
-				"object-src 'none'",
-				"frame-ancestors 'self'",
-				"form-action 'self'",
-				"img-src 'self' data: blob: https:",
-				"font-src 'self' data:",
-				`connect-src 'self'${umamiOrigin ? ` ${umamiOrigin}` : ""}`,
-			],
-			scriptDirective: {
-				resources: ["'self'", ...(umamiOrigin ? [umamiOrigin] : [])],
-			},
-			styleDirective: {
-				resources: ["'self'"],
-			},
+	env: {
+		schema: {
+			UMAMI_AUTH_TOKEN: envField.string({ context: "server", access: "secret", optional: true, default: "" }),
+			UMAMI_BASE_URL: envField.string({ context: "server", access: "public", default: "https://umami.lvcdy.cn" }),
+			UMAMI_WEBSITE_ID: envField.string({ context: "server", access: "public", default: "cffa7f37-d0b7-4c37-90a6-8569946f871b" }),
 		},
+	},
+	cache: {
+		provider: memoryCache(),
+	},
+	routeRules: {
+		"/api/stats/[...path]": { maxAge: 300, swr: 600 },
 	},
 	devToolbar: {
 		placement: "bottom-left",

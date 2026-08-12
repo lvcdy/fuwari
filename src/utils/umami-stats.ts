@@ -1,4 +1,5 @@
 import { umamiConfig } from "@/config";
+import { getSecret } from "astro:env/server";
 
 export type UmamiStats = {
 	pageviews: number;
@@ -84,7 +85,7 @@ function buildStatsUrl(websiteId: string, normalizedPath?: string) {
 
 async function queryStats(normalizedPath?: string): Promise<UmamiStats> {
 	const websiteId = getWebsiteId();
-	const authToken = umamiConfig.authToken?.trim();
+	const authToken = (await getSecret("UMAMI_AUTH_TOKEN"))?.trim();
 
 	if (!authToken) {
 		throw new Error("Missing Umami auth token");

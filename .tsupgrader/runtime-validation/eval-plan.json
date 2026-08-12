@@ -1,0 +1,16 @@
+{
+  "projectType": "webapp",
+  "setup": [
+    { "command": "pnpm", "args": ["install"] }
+  ],
+  "assertions": [
+    {
+      "name": "astro-build",
+      "kind": "process",
+      "command": "pnpm",
+      "args": ["astro", "build"],
+      "verificationMethod": "exit-code",
+      "expected": "0"
+    }
+  ]
+}

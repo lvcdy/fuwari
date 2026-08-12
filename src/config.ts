@@ -9,12 +9,11 @@ import type {
 	UmamiConfig,
 } from "./types/config";
 import { LinkPreset } from "./types/config";
-import {
-	UMAMI_AUTH_TOKEN,
-	UMAMI_BASE_URL,
-	UMAMI_SHARE_URL,
-	UMAMI_WEBSITE_ID,
-} from "./constants/constants";
+import { UMAMI_SHARE_URL } from "./constants/constants";
+
+const UMAMI_AUTH_TOKEN = import.meta.env.UMAMI_AUTH_TOKEN ?? "";
+const UMAMI_BASE_URL = import.meta.env.UMAMI_BASE_URL ?? "https://umami.lvcdy.cn";
+const UMAMI_WEBSITE_ID = import.meta.env.UMAMI_WEBSITE_ID ?? "cffa7f37-d0b7-4c37-90a6-8569946f871b";
 
 export const siteConfig: SiteConfig = {
 	title: "Fuwari",
@@ -60,12 +59,12 @@ export const navBarConfig: NavBarConfig = {
 		},
 		...(UMAMI_SHARE_URL
 			? [
-					{
-						name: "统计",
-						url: UMAMI_SHARE_URL,
-						external: true,
-					},
-				]
+				{
+					name: "统计",
+					url: UMAMI_SHARE_URL,
+					external: true,
+				},
+			]
 			: []),
 	],
 };
@@ -111,7 +110,8 @@ export const umamiConfig: UmamiConfig = {
 	baseUrl: UMAMI_BASE_URL,
 	websiteId: UMAMI_WEBSITE_ID,
 	timezone: "Asia/Shanghai",
-	authToken: UMAMI_AUTH_TOKEN,
+	// Only used to check if token is configured, actual value read via getSecret() at runtime
+	authToken: UMAMI_AUTH_TOKEN ? "***" : "",
 };
 
 // Text color adaptive configuration

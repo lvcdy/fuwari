@@ -13,7 +13,6 @@ export const GET: APIRoute = async () => {
 		return jsonResponse(
 			{
 				error: "Unable to fetch site stats",
-				detail: error instanceof Error ? error.message : String(error),
 			},
 			503,
 			noStoreHeaders,
