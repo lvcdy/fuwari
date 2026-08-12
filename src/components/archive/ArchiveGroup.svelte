@@ -2,9 +2,9 @@
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
 import {
+	type ArchiveGroup,
 	formatArchiveDate,
 	formatArchiveTags,
-	type ArchiveGroup,
 } from "../../utils/archive-utils";
 import { getPostUrlBySlug } from "../../utils/url-utils";
 

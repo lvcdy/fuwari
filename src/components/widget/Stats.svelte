@@ -1,77 +1,77 @@
 <script lang="ts">
-  import Icon from '@iconify/svelte';
-  import { onMount } from 'svelte';
-  import { formatStatCount } from '@/utils/number-utils';
+import Icon from "@iconify/svelte";
+import { onMount } from "svelte";
+import { formatStatCount } from "@/utils/number-utils";
 
-  export let className = '';
-  export let style = '';
-  export let initialPostCount = 0;
-  export let initialTotalWords = 0;
-  export let initialVisits = 0;
-  export let initialPageviews = 0;
+export let className = "";
+export let style = "";
+export let initialPostCount = 0;
+export let initialTotalWords = 0;
+export let initialVisits = 0;
+export let initialPageviews = 0;
 
-  let isExpanded = true;
-  let postCount = initialPostCount;
-  let totalWords = initialTotalWords;
-  let visits = initialVisits;
-  let pageviews = initialPageviews;
+let isExpanded = true;
+let postCount = initialPostCount;
+let totalWords = initialTotalWords;
+let visits = initialVisits;
+let pageviews = initialPageviews;
 
-  type StatTile = {
-    icon: string;
-    label: string;
-    getValue: () => string;
-  };
+type StatTile = {
+	icon: string;
+	label: string;
+	getValue: () => string;
+};
 
-  const statsTiles: StatTile[] = [
-    {
-      icon: 'material-symbols:person-outline',
-      label: '访问量',
-      getValue: () => formatStatCount(visits),
-    },
-    {
-      icon: 'material-symbols:visibility-outline',
-      label: '阅读量',
-      getValue: () => formatStatCount(pageviews),
-    },
-  ];
+const statsTiles: StatTile[] = [
+	{
+		icon: "material-symbols:person-outline",
+		label: "访问量",
+		getValue: () => formatStatCount(visits),
+	},
+	{
+		icon: "material-symbols:visibility-outline",
+		label: "阅读量",
+		getValue: () => formatStatCount(pageviews),
+	},
+];
 
-  async function loadSiteStats() {
-    try {
-      const response = await fetch('/api/stats/site.json', {
-        cache: 'no-store',
-        headers: {
-          accept: 'application/json',
-        },
-      });
+async function loadSiteStats() {
+	try {
+		const response = await fetch("/api/stats/site.json", {
+			cache: "no-store",
+			headers: {
+				accept: "application/json",
+			},
+		});
 
-      if (!response.ok) {
-        return null;
-      }
+		if (!response.ok) {
+			return null;
+		}
 
-      const data = await response.json();
+		const data = await response.json();
 
-      return {
-        visits: Number(data.visits) || 0,
-        pageviews: Number(data.pageviews) || 0,
-      };
-    } catch {
-      // Keep the default placeholder values when stats are unavailable.
-      return null;
-    }
-  }
+		return {
+			visits: Number(data.visits) || 0,
+			pageviews: Number(data.pageviews) || 0,
+		};
+	} catch {
+		// Keep the default placeholder values when stats are unavailable.
+		return null;
+	}
+}
 
-  onMount(async () => {
-    const siteStats = await loadSiteStats();
+onMount(async () => {
+	const siteStats = await loadSiteStats();
 
-    if (siteStats) {
-      visits = siteStats.visits;
-      pageviews = siteStats.pageviews;
-    }
-  });
+	if (siteStats) {
+		visits = siteStats.visits;
+		pageviews = siteStats.pageviews;
+	}
+});
 
-  function toggleExpand() {
-    isExpanded = !isExpanded;
-  }
+function toggleExpand() {
+	isExpanded = !isExpanded;
+}
 </script>
 
 <div class={`card-base p-3 ${className}`} {style}>

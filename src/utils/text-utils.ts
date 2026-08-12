@@ -16,7 +16,9 @@ export function countWords(markdown: string): number {
 		.replace(/[\r\n\t]+/g, " ");
 
 	// Count Chinese characters (including Chinese punctuation)
-	const chineseChars = cleaned.match(/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g);
+	const chineseChars = cleaned.match(
+		/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g,
+	);
 	const chineseCount = chineseChars ? chineseChars.length : 0;
 
 	// Count English words (sequences of Latin letters)

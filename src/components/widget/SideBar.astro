@@ -1,12 +1,12 @@
 ---
 import type { MarkdownHeading } from "astro";
+import { getPostBody, getSortedPosts } from "@/utils/content-utils";
+import { safeGetSiteStats } from "@/utils/stats";
+import { countWords } from "@/utils/text-utils";
 import Categories from "./Categories.astro";
 import Profile from "./Profile.astro";
 import Stats from "./Stats.svelte";
 import Tags from "./Tags.astro";
-import { getPostBody, getSortedPosts } from "@/utils/content-utils";
-import { safeGetSiteStats } from "@/utils/stats";
-import { countWords } from "@/utils/text-utils";
 
 interface Props {
 	class?: string;

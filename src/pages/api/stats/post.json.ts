@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
-import { getPathStats } from "../../../utils/umami-stats";
 import { emptyStats, jsonResponse, noStoreHeaders } from "@/utils/stats";
+import { getPathStats } from "../../../utils/umami-stats";
 
 export const GET: APIRoute = async ({ request }) => {
 	const requestUrl = new URL(request.url);

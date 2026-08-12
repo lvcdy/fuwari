@@ -8,8 +8,8 @@ import Markdown from "@components/misc/Markdown.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPosts } from "@utils/content-utils";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
-import { getPostUrlBySlug, normalizePostSlug } from "@utils/url-utils";
 import { safeGetPathStats } from "@utils/stats";
+import { getPostUrlBySlug, normalizePostSlug } from "@utils/url-utils";
 import { profileConfig, siteConfig } from "@/config";
 
 export async function getStaticPaths() {

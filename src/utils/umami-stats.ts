@@ -1,5 +1,5 @@
-import { umamiConfig } from "@/config";
 import { getSecret } from "astro:env/server";
+import { umamiConfig } from "@/config";
 
 export type UmamiStats = {
 	pageviews: number;

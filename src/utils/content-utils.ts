@@ -94,7 +94,9 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 	return sortedPostsList;
 }
 
-export async function getPostBody(post: CollectionEntry<"posts">): Promise<string> {
+export async function getPostBody(
+	post: CollectionEntry<"posts">,
+): Promise<string> {
 	if (typeof post.body === "string" && post.body.length > 0) {
 		return post.body;
 	}
